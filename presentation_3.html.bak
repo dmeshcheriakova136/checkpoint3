@@ -1,0 +1,2057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>X Redesign — Checkpoint 3</title>
+<style>
+  /* ── Reset & Base ─────────────────────────────── */
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0a0a0a;
+    --bg-card: rgba(255,255,255,0.04);
+    --border: rgba(255,255,255,0.08);
+    --text: #e8e8e8;
+    --text-dim: #888;
+    --accent: #d4d4d4;
+    --metallic: linear-gradient(135deg, #fff 0%, #999 40%, #fff 60%, #777 100%);
+  }
+
+  html {
+    scroll-snap-type: y mandatory;
+    overflow-y: scroll;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'Inter', 'SF Pro Display', -apple-system, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Slide Base ───────────────────────────────── */
+  .slide {
+    min-height: 100vh;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 10%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ── Scroll Animations ────────────────────────── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reveal-delay-1 { transition-delay: 0.15s; }
+  .reveal-delay-2 { transition-delay: 0.30s; }
+  .reveal-delay-3 { transition-delay: 0.45s; }
+  .reveal-delay-4 { transition-delay: 0.60s; }
+  .reveal-delay-5 { transition-delay: 0.75s; }
+
+  /* ── Typography ───────────────────────────────── */
+  .slide-label {
+    font-size: 1.5rem;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 24px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+  .slide-title {
+    font-size: clamp(3rem, 6vw, 4.5rem);
+    font-weight: 700;
+    background: linear-gradient(90deg, #fff 0%, #999 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  .slide-subtitle {
+    font-size: 1.8rem;
+    color: #ffffff;
+    max-width: 80%;
+    text-align: center;
+    line-height: 1.7;
+    font-weight: 400;
+  }
+
+  /* ═══════════════════════════════════════════════
+     SLIDE 1 — HERO
+     ═══════════════════════════════════════════════ */
+  .hero {
+    background: radial-gradient(ellipse at 50% 40%, #151520 0%, #0a0a0c 70%);
+    overflow: hidden;
+  }
+  .hero-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    position: relative;
+    text-align: center;
+  }
+  .x-logo {
+    font-size: clamp(10rem, 18vw, 14rem);
+    font-weight: 900;
+    line-height: 1;
+    font-family: 'Inter', Arial, sans-serif;
+    background: linear-gradient(180deg, #a0a0a8 0%, #78787e 50%, #606068 100%);
+    background-size: 100% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: hero-metal 6s ease-in-out infinite;
+    margin-bottom: 20px;
+  }
+  @keyframes hero-metal {
+    0%, 100% { background-position: 0% 0%; }
+    50% { background-position: 0% 100%; }
+  }
+  .hero h1 {
+    font-size: clamp(2rem, 3.5vw, 2.6rem);
+    font-weight: 700;
+    color: rgba(255,255,255,0.85);
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+  }
+  .hero .checkpoint {
+    font-size: 1.1rem;
+    font-weight: 400;
+    letter-spacing: 10px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.25);
+  }
+
+  /* Drifting Stars */
+  .star-field {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+  }
+  .star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: white;
+    border-radius: 50%;
+    opacity: 0;
+    animation: drift var(--drift-dur) linear infinite, star-fade var(--fade-dur) ease-in-out infinite;
+    animation-delay: var(--delay);
+  }
+  @keyframes drift {
+    from { transform: translateY(0); }
+    to { transform: translateY(-110vh); }
+  }
+  @keyframes star-fade {
+    0%, 100% { opacity: 0; }
+    20%, 80% { opacity: var(--star-opacity); }
+  }
+
+  /* ═══════════════════════════════════════════════
+     SLIDE 2 — TEAM
+     ═══════════════════════════════════════════════ */
+  .team-rows {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 60px;
+    margin-top: 48px;
+    width: 90%;
+    max-width: 1200px;
+  }
+  .team-row-top, .team-row-bottom {
+    display: flex;
+    justify-content: center;
+    gap: 72px;
+  }
+  .team-card {
+    text-align: center;
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+    width: 160px;
+  }
+  .team-card:hover {
+    transform: translateY(-4px);
+  }
+  .team-avatar {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #333, #555);
+    margin: 0 auto 18px;
+    overflow: hidden;
+    border: 2px solid rgba(255,255,255,0.1);
+  }
+  .team-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+  }
+  .team-card h3 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    background: linear-gradient(90deg, #fff 0%, #999 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.3;
+  }
+
+  /* ═══════════════════════════════════════════════
+     SLIDE 3 — WHAT HAVE WE DONE
+     ═══════════════════════════════════════════════ */
+  .phases {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 32px;
+    width: 80%;
+    max-width: 1100px;
+    margin-top: 48px;
+  }
+  .phase-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 40px 28px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .phase-number {
+    font-size: 3.5rem;
+    font-weight: 800;
+    background: var(--metallic);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+  .phase-card h3 { font-size: 1.5rem; margin-bottom: 10px; }
+  .phase-card p { font-size: 1.5rem; color: var(--text-dim); line-height: 1.5; }
+  .back-note {
+    margin-top: 40px;
+    font-style: italic;
+    color: var(--text-dim);
+    font-size: 1.5rem;
+  }
+
+  /* ═══════════════════════════════════════════════
+     SLIDE 4 — OUR PROBLEMS
+     ═══════════════════════════════════════════════ */
+  .problems-list {
+    list-style: none;
+    counter-reset: problems;
+    margin-top: 48px;
+    text-align: left;
+    max-width: 800px;
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .problems-list li {
+    counter-increment: problems;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text);
+    padding: 32px 40px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  .problems-list li::before {
+    content: "0" counter(problems);
+    font-size: 2.2rem;
+    font-weight: 800;
+    background: var(--metallic);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    flex-shrink: 0;
+  }
+
+  /* ═══════════════════════════════════════════════
+     PHONE MOCKUPS (kept for reuse)
+     ═══════════════════════════════════════════════ */
+  .mockups-row {
+    display: flex;
+    gap: 48px;
+    margin-top: 48px;
+    justify-content: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    width: 90%;
+    max-width: 1200px;
+  }
+  .phone-mockup {
+    position: relative;
+    flex-shrink: 0;
+  }
+  .phone-frame {
+    width: 280px;
+    height: 580px;
+    border-radius: 36px;
+    border: 3px solid rgba(255,255,255,0.15);
+    overflow: hidden;
+    background: #000;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .phone-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+  }
+  .phone-label {
+    text-align: center;
+    margin-top: 16px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  /* Hand-drawn annotation circles */
+  .annotation-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+  }
+  .annotation-layer svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .hand-circle {
+    fill: none;
+    stroke: #ff4444;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-dasharray: var(--len);
+    stroke-dashoffset: var(--len);
+    opacity: 0;
+  }
+  .hand-line {
+    fill: none;
+    stroke: #ff4444;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-dasharray: var(--len);
+    stroke-dashoffset: var(--len);
+  }
+  .phone-mockup.visible .hand-circle,
+  .phone-mockup.visible .hand-line {
+    opacity: 1;
+    animation: draw-stroke 1.2s ease forwards;
+  }
+  .phone-mockup.visible .hand-circle.delay-1,
+  .phone-mockup.visible .hand-line.delay-1 { animation-delay: 0.8s; }
+  .phone-mockup.visible .hand-circle.delay-2,
+  .phone-mockup.visible .hand-line.delay-2 { animation-delay: 1.6s; }
+
+  @keyframes draw-stroke {
+    to { stroke-dashoffset: 0; }
+  }
+
+  /* Annotation callout labels */
+  .callout {
+    position: absolute;
+    font-size: 0.85rem;
+    color: #ff4444;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    line-height: 1.3;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+  .phone-mockup.visible .callout { opacity: 1; transform: translateY(0); }
+  .phone-mockup.visible .callout.delay-1 { transition-delay: 1.2s; }
+  .phone-mockup.visible .callout.delay-2 { transition-delay: 2.0s; }
+
+  /* ═══════════════════════════════════════════════
+     SLIDE 5 — INFORMATION ARCHITECTURE
+     ═══════════════════════════════════════════════ */
+  .ia-diagram {
+    width: 90%;
+    max-width: 1100px;
+    margin-top: 48px;
+    padding: 48px 40px;
+  }
+  .ia-svg {
+    width: 100%;
+    height: auto;
+  }
+
+  /* ═══════════════════════════════════════════════
+     SLIDE 6 — USER RESEARCH
+     ═══════════════════════════════════════════════ */
+  .research-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    width: 80%;
+    max-width: 1100px;
+    margin-top: 48px;
+  }
+  .method-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 44px 40px;
+    position: relative;
+  }
+  .method-badge {
+    display: inline-block;
+    font-size: 1.5rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    padding: 6px 16px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+  .method-card h3 { font-size: 1.75rem; margin-bottom: 14px; font-weight: 700; }
+  .method-card p { font-size: 1.5rem; color: var(--text-dim); line-height: 1.6; }
+  .method-stat {
+    font-size: 3.5rem;
+    font-weight: 800;
+    background: var(--metallic);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 16px 0;
+  }
+
+  /* Interview card: left info + right issues */
+  .interview-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 40px;
+    align-items: start;
+  }
+  .interview-issues {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+  .issue-item h4 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .quote {
+    font-style: italic;
+    color: var(--accent);
+    border-left: 3px solid rgba(255,255,255,0.15);
+    padding-left: 20px;
+    margin-top: 8px;
+    font-size: 1.1rem;
+    line-height: 1.6;
+  }
+
+  /* ═══════════════════════════════════════════════
+     SLIDES 7-10 — PERSONAS & JOURNEYS
+     ═══════════════════════════════════════════════ */
+  .persona-card-full {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 52px 48px;
+    width: 80%;
+    max-width: 1100px;
+    backdrop-filter: blur(10px);
+  }
+  .persona-header {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+  .persona-avatar-lg {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #333, #555);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    flex-shrink: 0;
+  }
+  .persona-meta h2 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    background: linear-gradient(90deg, #fff 0%, #999 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .persona-meta p { font-size: 1.5rem; color: var(--text-dim); }
+  .persona-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px;
+  }
+  .persona-detail h4 {
+    font-size: 1.5rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+  .persona-detail p { font-size: 1.5rem; color: var(--accent); line-height: 1.5; }
+
+  /* ── Journey Graph — Emotional Curve (JSX Port) ── */
+  .jg-wrap {
+    width: 100%;
+    max-width: 1060px;
+    margin-top: 32px;
+    position: relative;
+  }
+  .jg-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .jg-title { font-size: 1.4rem; font-weight: 700; color: var(--text); }
+  .jg-legend { display: flex; gap: 20px; font-size: 0.8rem; color: #aaa; }
+  .jg-legend span { display: flex; align-items: center; gap: 6px; }
+  .jg-chart {
+    position: relative;
+    width: 1060px;
+    max-width: 100%;
+    height: 420px;
+  }
+  .jg-chart svg { position: absolute; inset: 0; overflow: visible; }
+  /* Keyframes matching JSX exactly */
+  @keyframes jg-expandRing {
+    0%   { r: 10; opacity: 0.9; }
+    100% { r: 44; opacity: 0; }
+  }
+  @keyframes jg-popDot {
+    0%   { transform: scale(0); }
+    60%  { transform: scale(1.3); }
+    100% { transform: scale(1); }
+  }
+  @keyframes jg-labelSlideIn {
+    0%   { opacity: 0; transform: translate(-50%, 6px); }
+    100% { opacity: 1; transform: translate(-50%, 0); }
+  }
+  @keyframes jg-labelRollUp {
+    0%   { opacity: 1; transform: translate(-50%, 0); }
+    100% { opacity: 0; transform: translate(-50%, -22px); }
+  }
+  @keyframes jg-emojiBounce {
+    0%   { opacity: 0; transform: translate(-50%, -18px) scale(0.5); }
+    60%  { transform: translate(-50%, 4px) scale(1.15); opacity: 1; }
+    100% { transform: translate(-50%, 0) scale(1); opacity: 1; }
+  }
+  @keyframes jg-badgePop {
+    0%   { opacity: 0; transform: translate(-50%, 0) scale(0.7); }
+    70%  { transform: translate(-50%, 0) scale(1.08); opacity: 1; }
+    100% { transform: translate(-50%, 0) scale(1); opacity: 1; }
+  }
+  @keyframes jg-glowPulse {
+    0%, 100% { filter: drop-shadow(0 0 5px currentColor); }
+    50%      { filter: drop-shadow(0 0 14px currentColor); }
+  }
+  /* Overlay elements */
+  .jg-overlay {
+    position: absolute;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 10;
+  }
+  .jg-step-label {
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #000;
+    letter-spacing: 0.3px;
+  }
+  .jg-emoji {
+    font-size: 32px;
+    line-height: 1;
+  }
+  .jg-badge {
+    background: rgba(10,10,10,0.85);
+    padding: 3px 11px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+  }
+  .jg-xlabel {
+    position: absolute;
+    font-size: 11px;
+    color: #555;
+    letter-spacing: 0.2px;
+    transform: translateX(-50%);
+  }
+
+  /* ═══════════════════════════════════════════════
+     SLIDE 11 — PROBLEMS
+     ═══════════════════════════════════════════════ */
+  .problems-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 32px;
+    width: 80%;
+    max-width: 1100px;
+    margin-top: 48px;
+  }
+  .problem-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 40px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .problem-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #f87171, #fb923c, #facc15);
+  }
+  .problem-number {
+    font-size: 3rem;
+    font-weight: 900;
+    color: rgba(255,255,255,0.06);
+    position: absolute;
+    top: 12px;
+    right: 20px;
+    font-family: 'SF Mono', monospace;
+  }
+  .problem-card h3 { font-size: 1.75rem; margin-bottom: 14px; font-weight: 700; }
+  .problem-card p { font-size: 1.5rem; color: var(--text-dim); line-height: 1.6; }
+
+  /* ═══════════════════════════════════════════════
+     SLIDE 12 — NEXT STEPS
+     ═══════════════════════════════════════════════ */
+  .next-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    width: 80%;
+    max-width: 800px;
+    margin-top: 48px;
+  }
+  .step-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 32px;
+  }
+  .step-num {
+    font-size: 2rem;
+    font-weight: 800;
+    background: var(--metallic);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    flex-shrink: 0;
+    line-height: 1;
+    margin-top: 2px;
+  }
+  .step-item h3 { font-size: 1.75rem; margin-bottom: 6px; }
+  .step-item p { font-size: 1.5rem; color: var(--text-dim); line-height: 1.5; }
+
+  .footer-note {
+    margin-top: 48px;
+    font-size: 1.5rem;
+    color: #444;
+    letter-spacing: 3px;
+    font-family: 'SF Mono', monospace;
+  }
+
+  /* ── Scrollbar ────────────────────────────────── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+  /* ── Responsive ───────────────────────────────── */
+  @media (max-width: 768px) {
+    .slide { padding: 40px 20px; }
+    .persona-card-full { padding: 28px 20px; }
+    .persona-header { flex-direction: column; text-align: center; }
+    .mockups-row { gap: 32px; }
+    .phone-frame { width: 240px; height: 500px; }
+    .callout { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     SLIDE 1 — HERO
+     ═══════════════════════════════════════════════ -->
+<section class="slide hero" id="hero">
+  <div class="star-field" id="starfield"></div>
+  <div class="hero-content">
+    <div class="x-logo">X</div>
+    <h1>X Team</h1>
+    <p class="checkpoint">Checkpoint 3</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SLIDE 2 — TEAM
+     ═══════════════════════════════════════════════ -->
+<section class="slide" id="team">
+  <p class="slide-label reveal">Our Team</p>
+  <h1 class="slide-title reveal reveal-delay-1">Meet the Team</h1>
+  <div class="team-rows">
+    <div class="team-row-top">
+      <div class="team-card reveal reveal-delay-1">
+        <div class="team-avatar"><img src="assets/daria.png" alt="Daria" style="object-position:center 20%;"></div>
+        <h3>Daria Meshcheriakova</h3>
+      </div>
+      <div class="team-card reveal reveal-delay-2">
+        <div class="team-avatar"><img src="assets/Megan_Photo.jpg" alt="Megan" style="object-position:center 15%;"></div>
+        <h3>Megan Weiss</h3>
+      </div>
+      <div class="team-card reveal reveal-delay-3">
+        <div class="team-avatar"><img src="assets/Amy_Photo.jpg" alt="Amy" style="object-position:center 15%;"></div>
+        <h3>Amy Wang</h3>
+      </div>
+    </div>
+    <div class="team-row-bottom">
+      <div class="team-card reveal reveal-delay-4">
+        <div class="team-avatar"><img src="assets/Dhruv_Photo.jpg" alt="Dhruv" style="object-position:center 15%;"></div>
+        <h3>Dhruv Sawhney</h3>
+      </div>
+      <div class="team-card reveal reveal-delay-5">
+        <div class="team-avatar"><img src="assets/Nipun_Photo.jpg" alt="Nipun" style="object-position:center 15%;"></div>
+        <h3>Nipun Chandra Surnilla</h3>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SLIDE 3 — WHAT HAVE WE DONE
+     ═══════════════════════════════════════════════ -->
+<section class="slide" id="overview">
+  <p class="slide-label reveal">Overview</p>
+  <h1 class="slide-title reveal reveal-delay-1">What Have We Done?</h1>
+  <div class="phases">
+    <div class="phase-card reveal reveal-delay-1">
+      <div class="phase-number">01</div>
+      <h3>High-Fidelity Wireframing</h3>
+      <p>We elevated our lo-fi flows into polished, pixel-accurate screens grounded in our design system.</p>
+    </div>
+    <div class="phase-card reveal reveal-delay-2">
+      <div class="phase-number">02</div>
+      <h3>A/B Testing</h3>
+      <p>We ran 11 A/B tests to validate layout, navigation, and interaction decisions with real users.</p>
+    </div>
+    <div class="phase-card reveal reveal-delay-3">
+      <div class="phase-number">03</div>
+      <h3>Prototyping</h3>
+      <p>We connected our hi-fi screens into interactive prototypes to demonstrate the redesigned end-to-end flow.</p>
+    </div>
+  </div>
+  <p class="back-note reveal reveal-delay-4">Let's go back to the beginning of April&hellip;</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SLIDE 4 — OUR PROBLEMS
+     ═══════════════════════════════════════════════ -->
+<section class="slide" id="problems">
+  <p class="slide-label reveal">Key Findings</p>
+  <h1 class="slide-title reveal reveal-delay-1">Our Problems</h1>
+  <ol class="problems-list">
+    <li class="reveal reveal-delay-1">Cluttered &amp; Redundant Navigation</li>
+    <li class="reveal reveal-delay-2">Lack of Customization &amp; Personalization</li>
+    <li class="reveal reveal-delay-3">Inconsistent &amp; Overwhelming UI</li>
+  </ol>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SLIDE 5 — INFORMATION ARCHITECTURE
+     ═══════════════════════════════════════════════ -->
+<section class="slide" id="info-arch">
+  <p class="slide-label reveal">Phase 01</p>
+  <h1 class="slide-title reveal reveal-delay-1">Information Architecture</h1>
+  <p class="slide-subtitle reveal reveal-delay-2"><span style="color:#ffffff;margin-right:12px;">01</span>Side Navigation Bar</p>
+  <div class="ia-diagram reveal reveal-delay-3" id="ia-container" style="cursor:pointer;">
+    <p class="ia-click-hint" id="ia-hint" style="text-align:center;color:var(--text-dim);font-size:0.9rem;margin-bottom:16px;letter-spacing:2px;text-transform:uppercase;">Click to simplify</p>
+    <svg id="ia-svg" viewBox="0 0 1060 700" xmlns="http://www.w3.org/2000/svg" class="ia-svg">
+      <style>
+        .ia-node { transition: transform 0.8s ease, opacity 0.8s ease; }
+        .ia-node.removing { opacity: 0; transform: translateX(-30px); }
+        .ia-line { transition: opacity 0.6s ease; }
+        .ia-line.removing { opacity: 0; }
+        .ia-badge { transition: opacity 0.5s ease; }
+      </style>
+
+      <!-- Connecting lines -->
+      <g stroke="#5a6a7a" stroke-width="2" fill="none">
+        <line x1="130" y1="350" x2="220" y2="350"/>
+        <line x1="330" y1="350" x2="420" y2="350"/>
+        <line x1="530" y1="350" x2="570" y2="350"/>
+        <!-- Trunk line (will be resized by JS) -->
+        <line id="ia-trunk" x1="570" y1="50" x2="570" y2="650"/>
+        <!-- Branch lines for each item -->
+        <line class="ia-line" data-item="profile" x1="570" y1="50" x2="620" y2="50"/>
+        <line class="ia-line" data-item="premium" x1="570" y1="110" x2="620" y2="110"/>
+        <line class="ia-line" data-item="video" x1="570" y1="170" x2="620" y2="170"/>
+        <line class="ia-line" data-item="communities" x1="570" y1="230" x2="620" y2="230"/>
+        <line class="ia-line" data-item="bookmarks" x1="570" y1="290" x2="620" y2="290"/>
+        <line class="ia-line" data-item="lists" x1="570" y1="350" x2="620" y2="350"/>
+        <line class="ia-line" data-item="spaces" x1="570" y1="410" x2="620" y2="410"/>
+        <line class="ia-line" data-item="creator" x1="570" y1="470" x2="620" y2="470"/>
+        <line class="ia-line" data-item="grok-dl" x1="570" y1="530" x2="620" y2="530"/>
+        <line class="ia-line" data-item="settings" x1="570" y1="590" x2="620" y2="590"/>
+        <line class="ia-line" data-item="help" x1="570" y1="650" x2="620" y2="650"/>
+        <!-- Sub-item lines removed -->
+      </g>
+
+      <!-- Divider line -->
+      <line id="ia-divider" x1="620" y1="500" x2="760" y2="500" stroke="#4a5a6a" stroke-width="1" stroke-dasharray="4,4" style="transition:opacity 0.6s ease;"/>
+
+      <!-- Fixed Nodes (Open App, Home, Hamburger) -->
+      <g class="ia-node">
+        <rect x="40" y="330" width="90" height="40" rx="8" fill="#2d4a3e" stroke="#4a8a6a" stroke-width="1.5"/>
+        <text x="85" y="355" text-anchor="middle" fill="#a0d8b8" font-size="12" font-weight="600" font-family="Inter, sans-serif">Open App</text>
+      </g>
+      <g class="ia-node">
+        <rect x="220" y="330" width="110" height="40" rx="8" fill="#2a3444" stroke="#4a5a6a" stroke-width="1.5"/>
+        <text x="275" y="355" text-anchor="middle" fill="#c8d4e0" font-size="12" font-weight="600" font-family="Inter, sans-serif">Home</text>
+      </g>
+      <g class="ia-node">
+        <rect x="420" y="330" width="110" height="40" rx="8" fill="#2a3444" stroke="#4a5a6a" stroke-width="1.5"/>
+        <text x="475" y="355" text-anchor="middle" fill="#c8d4e0" font-size="12" font-weight="600" font-family="Inter, sans-serif">Hamburger</text>
+      </g>
+
+      <!-- Animated menu items -->
+      <g class="ia-node" data-item="profile">
+        <rect x="620" y="30" width="140" height="40" rx="8" fill="#2a3444" stroke="#4a5a6a" stroke-width="1.5"/>
+        <text x="690" y="55" text-anchor="middle" fill="#c8d4e0" font-size="12" font-weight="600" font-family="Inter, sans-serif">Profile</text>
+      </g>
+      <g class="ia-node" data-item="premium">
+        <rect x="620" y="90" width="140" height="40" rx="8" fill="#2a3444" stroke="#4a5a6a" stroke-width="1.5"/>
+        <text x="690" y="115" text-anchor="middle" fill="#c8d4e0" font-size="12" font-weight="600" font-family="Inter, sans-serif">Premium</text>
+      </g>
+      <g class="ia-node" data-item="video">
+        <rect x="620" y="150" width="140" height="40" rx="8" fill="#2a3444" stroke="#4a5a6a" stroke-width="1.5"/>
+        <text x="690" y="175" text-anchor="middle" fill="#c8d4e0" font-size="12" font-weight="600" font-family="Inter, sans-serif">Video</text>
+      </g>
+      <g class="ia-node" data-item="communities">
+        <rect x="620" y="210" width="140" height="40" rx="8" fill="#2a3444" stroke="#4a5a6a" stroke-width="1.5"/>
+        <text x="690" y="235" text-anchor="middle" fill="#c8d4e0" font-size="12" font-weight="600" font-family="Inter, sans-serif">Communities</text>
+      </g>
+      <g class="ia-node" data-item="bookmarks">
+        <rect x="620" y="270" width="140" height="40" rx="8" fill="#2a3444" stroke="#4a5a6a" stroke-width="1.5"/>
+        <text x="690" y="295" text-anchor="middle" fill="#c8d4e0" font-size="12" font-weight="600" font-family="Inter, sans-serif">Bookmarks</text>
+      </g>
+      <g class="ia-node" data-item="lists">
+        <rect x="620" y="330" width="140" height="40" rx="8" fill="#2a3444" stroke="#4a5a6a" stroke-width="1.5"/>
+        <text x="690" y="355" text-anchor="middle" fill="#c8d4e0" font-size="12" font-weight="600" font-family="Inter, sans-serif">Lists</text>
+      </g>
+      <g class="ia-node" data-item="spaces">
+        <rect x="620" y="390" width="140" height="40" rx="8" fill="#2a3444" stroke="#4a5a6a" stroke-width="1.5"/>
+        <text x="690" y="415" text-anchor="middle" fill="#c8d4e0" font-size="12" font-weight="600" font-family="Inter, sans-serif">Spaces</text>
+      </g>
+      <g class="ia-node" data-item="creator">
+        <rect x="620" y="450" width="140" height="40" rx="8" fill="#2a3444" stroke="#4a5a6a" stroke-width="1.5"/>
+        <text x="690" y="475" text-anchor="middle" fill="#c8d4e0" font-size="12" font-weight="600" font-family="Inter, sans-serif">Creator Studio</text>
+      </g>
+      <g class="ia-node" data-item="grok-dl">
+        <rect x="620" y="510" width="140" height="40" rx="8" fill="#3a2a2a" stroke="#8a4a4a" stroke-width="1.5"/>
+        <text x="690" y="535" text-anchor="middle" fill="#e0a0a0" font-size="11" font-weight="600" font-family="Inter, sans-serif">Download Grok</text>
+      </g>
+      <g class="ia-node" data-item="settings">
+        <rect x="620" y="570" width="140" height="40" rx="8" fill="#2a3444" stroke="#4a5a6a" stroke-width="1.5"/>
+        <text x="690" y="595" text-anchor="middle" fill="#c8d4e0" font-size="11" font-weight="600" font-family="Inter, sans-serif">Settings &amp; Privacy</text>
+      </g>
+      <g class="ia-node" data-item="help">
+        <rect x="620" y="630" width="140" height="40" rx="8" fill="#2a3444" stroke="#4a5a6a" stroke-width="1.5"/>
+        <text x="690" y="655" text-anchor="middle" fill="#c8d4e0" font-size="12" font-weight="600" font-family="Inter, sans-serif">Help Center</text>
+      </g>
+
+      <!-- Sub-item nodes removed -->
+
+      <!-- Count badge -->
+      <g class="ia-badge" id="ia-badge">
+        <rect x="820" y="335" width="160" height="36" rx="18" fill="none" stroke="#8a4a4a" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <text x="900" y="358" text-anchor="middle" fill="#e0a0a0" font-size="11" font-weight="600" font-family="Inter, sans-serif">11 items in one menu</text>
+      </g>
+      <!-- Final badge (hidden) -->
+      <g class="ia-badge" id="ia-badge-final" opacity="0" style="transition:opacity 0.8s ease;">
+        <rect x="820" y="225" width="140" height="36" rx="18" fill="none" stroke="#4a8a6a" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <text x="890" y="248" text-anchor="middle" fill="#a0d8b8" font-size="11" font-weight="600" font-family="Inter, sans-serif">7 items — clean</text>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SLIDE 5B — FEEDER INFORMATION ARCHITECTURE
+     ═══════════════════════════════════════════════ -->
+<section class="slide" id="info-arch-feeder">
+  <p class="slide-subtitle reveal"><span style="color:#ffffff;margin-right:12px;">02</span>Feeder</p>
+  <p class="reveal reveal-delay-1" style="font-size:1rem;color:var(--text-dim);font-style:italic;margin-top:12px;max-width:780px;text-align:center;line-height:1.6;">Feeder — A tool that lets users create custom presets for their own feeds by selecting topics, adjusting tone, selecting the users and generating personalized timelines.</p>
+  <div class="ia-diagram reveal reveal-delay-3" id="feeder-container" style="cursor:pointer;">
+    <p class="ia-click-hint" id="feeder-hint" style="text-align:center;color:var(--text-dim);font-size:0.9rem;margin-bottom:16px;letter-spacing:2px;text-transform:uppercase;">Click to expand</p>
+    <svg id="feeder-svg" viewBox="0 0 900 620" xmlns="http://www.w3.org/2000/svg" class="ia-svg">
+
+      <!-- ══ TIER 0: Side Nav Bar + Feeder ══ -->
+      <g class="feeder-tier" data-tier="0">
+        <!-- Side Nav Bar -->
+        <rect x="370" y="10" width="160" height="36" rx="18" fill="none" stroke="#8a7a9a" stroke-width="1.5"/>
+        <text x="450" y="33" text-anchor="middle" fill="#c8b8d8" font-size="11" font-weight="600" font-family="Inter, sans-serif">Side Nav Bar</text>
+        <line x1="450" y1="46" x2="450" y2="64" stroke="#8a7a9a" stroke-width="2"/>
+        <!-- Feeder -->
+        <rect x="380" y="64" width="140" height="40" rx="20" fill="#2a2040" stroke="#8a7a9a" stroke-width="2"/>
+        <text x="450" y="89" text-anchor="middle" fill="#e0d4f0" font-size="13" font-weight="700" font-family="Inter, sans-serif">Feeder</text>
+        <line x1="450" y1="104" x2="450" y2="132" stroke="#8a7a9a" stroke-width="2"/>
+        <line x1="250" y1="132" x2="650" y2="132" stroke="#8a7a9a" stroke-width="2"/>
+        <line x1="250" y1="132" x2="250" y2="152" stroke="#8a7a9a" stroke-width="2"/>
+        <line x1="650" y1="132" x2="650" y2="152" stroke="#8a7a9a" stroke-width="2"/>
+      </g>
+
+      <!-- ══ TIER 1: Feed Creator & Customise ══ -->
+      <g class="feeder-tier" data-tier="1">
+        <rect x="170" y="152" width="160" height="36" rx="18" fill="none" stroke="#8a7a9a" stroke-width="1.5"/>
+        <text x="250" y="175" text-anchor="middle" fill="#c8b8d8" font-size="12" font-weight="600" font-family="Inter, sans-serif">Feed Creator</text>
+        <rect x="570" y="152" width="160" height="36" rx="18" fill="none" stroke="#8a7a9a" stroke-width="1.5"/>
+        <text x="650" y="175" text-anchor="middle" fill="#c8b8d8" font-size="12" font-weight="600" font-family="Inter, sans-serif">Customise</text>
+        <!-- Feed Creator → Create, History -->
+        <line x1="250" y1="188" x2="250" y2="214" stroke="#8a7a9a" stroke-width="1.5"/>
+        <line x1="130" y1="214" x2="370" y2="214" stroke="#8a7a9a" stroke-width="1.5"/>
+        <line x1="130" y1="214" x2="130" y2="236" stroke="#8a7a9a" stroke-width="1.5"/>
+        <line x1="370" y1="214" x2="370" y2="236" stroke="#8a7a9a" stroke-width="1.5"/>
+        <!-- Customise → Feeds, Humour -->
+        <line x1="650" y1="188" x2="650" y2="214" stroke="#8a7a9a" stroke-width="1.5"/>
+        <line x1="560" y1="214" x2="730" y2="214" stroke="#8a7a9a" stroke-width="1.5"/>
+        <line x1="560" y1="214" x2="560" y2="236" stroke="#8a7a9a" stroke-width="1.5"/>
+        <line x1="730" y1="214" x2="730" y2="236" stroke="#8a7a9a" stroke-width="1.5"/>
+      </g>
+
+      <!-- ══ TIER 2: Create, History, Feeds, Humour ══ -->
+      <g class="feeder-tier" data-tier="2">
+        <rect x="65" y="236" width="130" height="36" rx="18" fill="none" stroke="#8a7a9a" stroke-width="1.5"/>
+        <text x="130" y="259" text-anchor="middle" fill="#c8b8d8" font-size="12" font-weight="600" font-family="Inter, sans-serif">Create</text>
+        <rect x="305" y="236" width="130" height="36" rx="18" fill="none" stroke="#8a7a9a" stroke-width="1.5"/>
+        <text x="370" y="259" text-anchor="middle" fill="#c8b8d8" font-size="12" font-weight="600" font-family="Inter, sans-serif">History</text>
+        <rect x="495" y="236" width="130" height="36" rx="18" fill="none" stroke="#8a7a9a" stroke-width="1.5"/>
+        <text x="560" y="259" text-anchor="middle" fill="#c8b8d8" font-size="12" font-weight="600" font-family="Inter, sans-serif">Feeds</text>
+        <rect x="665" y="236" width="130" height="36" rx="18" fill="none" stroke="#8a7a9a" stroke-width="1.5"/>
+        <text x="730" y="259" text-anchor="middle" fill="#c8b8d8" font-size="12" font-weight="600" font-family="Inter, sans-serif">Humour</text>
+        <!-- Create → Text Box -->
+        <line x1="130" y1="272" x2="130" y2="316" stroke="#8a7a9a" stroke-width="1.5"/>
+        <!-- History → Revert, Delete -->
+        <line x1="370" y1="272" x2="370" y2="296" stroke="#8a7a9a" stroke-width="1.5"/>
+        <line x1="310" y1="296" x2="440" y2="296" stroke="#8a7a9a" stroke-width="1.5"/>
+        <line x1="310" y1="296" x2="310" y2="316" stroke="#8a7a9a" stroke-width="1.5"/>
+        <line x1="440" y1="296" x2="440" y2="316" stroke="#8a7a9a" stroke-width="1.5"/>
+        <!-- Humour → Formality -->
+        <line x1="730" y1="272" x2="730" y2="316" stroke="#8a7a9a" stroke-width="1.5"/>
+      </g>
+
+      <!-- ══ TIER 3: Text Box, Revert, Delete, Formality ══ -->
+      <g class="feeder-tier" data-tier="3">
+        <rect x="65" y="316" width="130" height="36" rx="18" fill="none" stroke="#8a7a9a" stroke-width="1.5"/>
+        <text x="130" y="339" text-anchor="middle" fill="#c8b8d8" font-size="11" font-weight="600" font-family="Inter, sans-serif">Text Box</text>
+        <rect x="250" y="316" width="120" height="36" rx="18" fill="none" stroke="#8a7a9a" stroke-width="1.5"/>
+        <text x="310" y="339" text-anchor="middle" fill="#c8b8d8" font-size="11" font-weight="600" font-family="Inter, sans-serif">Revert</text>
+        <rect x="380" y="316" width="120" height="36" rx="18" fill="none" stroke="#8a7a9a" stroke-width="1.5"/>
+        <text x="440" y="339" text-anchor="middle" fill="#c8b8d8" font-size="11" font-weight="600" font-family="Inter, sans-serif">Delete</text>
+        <rect x="665" y="316" width="130" height="36" rx="18" fill="none" stroke="#8a7a9a" stroke-width="1.5"/>
+        <text x="730" y="339" text-anchor="middle" fill="#c8b8d8" font-size="11" font-weight="600" font-family="Inter, sans-serif">Formality</text>
+        <!-- Text Box → Topics, Freeform -->
+        <line x1="130" y1="352" x2="130" y2="376" stroke="#8a7a9a" stroke-width="1.5"/>
+        <line x1="65" y1="376" x2="195" y2="376" stroke="#8a7a9a" stroke-width="1.5"/>
+        <line x1="65" y1="376" x2="65" y2="396" stroke="#8a7a9a" stroke-width="1.5"/>
+        <line x1="195" y1="376" x2="195" y2="396" stroke="#8a7a9a" stroke-width="1.5"/>
+        <!-- Revert → Edit -->
+        <line x1="310" y1="352" x2="310" y2="396" stroke="#8a7a9a" stroke-width="1.5"/>
+        <!-- Formality → Friends -->
+        <line x1="730" y1="352" x2="730" y2="396" stroke="#8a7a9a" stroke-width="1.5"/>
+      </g>
+
+      <!-- ══ TIER 4: Topics, Freeform, Edit, Friends ══ -->
+      <g class="feeder-tier" data-tier="4">
+        <rect x="10" y="396" width="110" height="36" rx="18" fill="none" stroke="#8a7a9a" stroke-width="1.5"/>
+        <text x="65" y="419" text-anchor="middle" fill="#c8b8d8" font-size="11" font-weight="600" font-family="Inter, sans-serif">Topics</text>
+        <rect x="140" y="396" width="110" height="36" rx="18" fill="none" stroke="#8a7a9a" stroke-width="1.5"/>
+        <text x="195" y="419" text-anchor="middle" fill="#c8b8d8" font-size="11" font-weight="600" font-family="Inter, sans-serif">Freeform</text>
+        <rect x="265" y="396" width="90" height="36" rx="18" fill="none" stroke="#8a7a9a" stroke-width="1.5"/>
+        <text x="310" y="419" text-anchor="middle" fill="#c8b8d8" font-size="11" font-weight="600" font-family="Inter, sans-serif">Edit</text>
+        <rect x="675" y="396" width="110" height="36" rx="18" fill="none" stroke="#8a7a9a" stroke-width="1.5"/>
+        <text x="730" y="419" text-anchor="middle" fill="#c8b8d8" font-size="11" font-weight="600" font-family="Inter, sans-serif">Friends</text>
+        <!-- Topics → Add -->
+        <line x1="65" y1="432" x2="65" y2="476" stroke="#8a7a9a" stroke-width="1.5"/>
+        <!-- Edit → Past Text Box -->
+        <line x1="310" y1="432" x2="310" y2="476" stroke="#8a7a9a" stroke-width="1.5"/>
+      </g>
+
+      <!-- ══ TIER 5: Add, Past Text Box ══ -->
+      <g class="feeder-tier" data-tier="5">
+        <rect x="10" y="476" width="110" height="36" rx="18" fill="none" stroke="#8a7a9a" stroke-width="1.5"/>
+        <text x="65" y="499" text-anchor="middle" fill="#c8b8d8" font-size="11" font-weight="600" font-family="Inter, sans-serif">Add</text>
+        <rect x="240" y="476" width="140" height="36" rx="18" fill="none" stroke="#8a7a9a" stroke-width="1.5"/>
+        <text x="310" y="499" text-anchor="middle" fill="#c8b8d8" font-size="11" font-weight="600" font-family="Inter, sans-serif">Past Text Box</text>
+        <!-- Add → Generate Feed -->
+        <line x1="65" y1="512" x2="65" y2="556" stroke="#8a7a9a" stroke-width="1.5"/>
+      </g>
+
+      <!-- ══ TIER 6: Generate Feed ══ -->
+      <g class="feeder-tier" data-tier="6">
+        <rect x="5" y="556" width="120" height="36" rx="18" fill="none" stroke="#8a7a9a" stroke-width="1.5"/>
+        <text x="65" y="579" text-anchor="middle" fill="#c8b8d8" font-size="11" font-weight="600" font-family="Inter, sans-serif">Generate Feed</text>
+      </g>
+
+    </svg>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SLIDE 5C — LOW NAVIGATION BAR
+     ═══════════════════════════════════════════════ -->
+<section class="slide" id="info-arch-lownav">
+  <p class="slide-subtitle reveal"><span style="color:#ffffff;margin-right:12px;">03</span>Low Navigation Bar</p>
+  <div class="ia-diagram reveal reveal-delay-3" id="lownav-container" style="cursor:pointer;">
+    <p class="ia-click-hint" id="lownav-hint" style="text-align:center;color:var(--text-dim);font-size:0.9rem;margin-bottom:16px;letter-spacing:2px;text-transform:uppercase;">Click to simplify</p>
+    <!-- Original 5-item nav (shown first) -->
+    <div id="lownav-original" style="position:relative;width:100%;max-width:600px;margin:0 auto;">
+      <div style="background:#1A1A1A;border-radius:16px;padding:20px 36px;display:flex;justify-content:space-between;align-items:center;border-top:0.667px solid #1E2939;">
+        <!-- Home -->
+        <div class="lownav-icon" data-item="home" style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+          <svg width="25" height="25" viewBox="0 0 25 25" fill="none"><path d="M3 12.5L12.5 3L22 12.5M5.5 10.5V21H10V15H15V21H19.5V10.5" stroke="#71767B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span style="font-size:10px;color:#71767B;font-family:Inter,sans-serif;">Home</span>
+        </div>
+        <!-- Search -->
+        <div class="lownav-icon" data-item="search" style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+          <svg width="25" height="25" viewBox="0 0 25 25" fill="none"><circle cx="11" cy="11" r="7.5" stroke="#71767B" stroke-width="1.8"/><line x1="16.5" y1="16.5" x2="22" y2="22" stroke="#71767B" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span style="font-size:10px;color:#71767B;font-family:Inter,sans-serif;">Search</span>
+        </div>
+        <!-- Grok -->
+        <div class="lownav-icon lownav-remove-item" data-item="grok" style="display:flex;flex-direction:column;align-items:center;gap:6px;transition:opacity 0.8s ease,transform 0.8s ease;">
+          <svg width="25" height="25" viewBox="0 0 25 25" fill="none"><circle cx="12.5" cy="12.5" r="9" stroke="#71767B" stroke-width="1.8"/><line x1="7" y1="12.5" x2="18" y2="12.5" stroke="#71767B" stroke-width="1.8" stroke-linecap="round" transform="rotate(45 12.5 12.5)"/></svg>
+          <span style="font-size:10px;color:#71767B;font-family:Inter,sans-serif;">Grok</span>
+        </div>
+        <!-- Notifications -->
+        <div class="lownav-icon lownav-remove-item" data-item="notifications" style="display:flex;flex-direction:column;align-items:center;gap:6px;transition:opacity 0.8s ease,transform 0.8s ease;">
+          <svg width="25" height="25" viewBox="0 0 25 25" fill="none"><path d="M6 17h13M7.5 17V11a5 5 0 0110 0v6M10 20a2.5 2.5 0 005 0" stroke="#71767B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span style="font-size:10px;color:#71767B;font-family:Inter,sans-serif;">Notifications</span>
+        </div>
+        <!-- Messages -->
+        <div class="lownav-icon lownav-remove-item" data-item="messages" style="display:flex;flex-direction:column;align-items:center;gap:6px;transition:opacity 0.8s ease,transform 0.8s ease;">
+          <svg width="25" height="25" viewBox="0 0 25 25" fill="none"><rect x="3" y="6" width="19" height="13" rx="2" stroke="#71767B" stroke-width="1.8"/><polyline points="3,8 12.5,14 22,8" fill="none" stroke="#71767B" stroke-width="1.8" stroke-linejoin="round"/></svg>
+          <span style="font-size:10px;color:#71767B;font-family:Inter,sans-serif;">Messages</span>
+        </div>
+      </div>
+      <p id="lownav-badge-old" style="text-align:center;margin-top:20px;font-size:0.85rem;color:#e0a0a0;letter-spacing:1px;transition:opacity 0.5s ease;">5 items — Grok forced in</p>
+    </div>
+
+    <!-- Updated 4-item nav from Figma (hidden initially) -->
+    <div id="lownav-updated" style="position:relative;width:100%;max-width:600px;margin:0 auto;opacity:0;height:0;overflow:hidden;transition:opacity 0.8s ease,height 0.8s ease;">
+      <!-- Labels row -->
+      <div style="display:flex;justify-content:space-between;padding:0 60px;margin-bottom:10px;">
+        <span style="font-size:12px;color:#a0d8b8;font-family:Inter,sans-serif;font-weight:600;letter-spacing:1px;">Home</span>
+        <span style="font-size:12px;color:#a0d8b8;font-family:Inter,sans-serif;font-weight:600;letter-spacing:1px;">Search</span>
+        <span style="font-size:12px;color:#a0d8b8;font-family:Inter,sans-serif;font-weight:600;letter-spacing:1px;">Chat</span>
+        <span style="font-size:12px;color:#a0d8b8;font-family:Inter,sans-serif;font-weight:600;letter-spacing:1px;">Profile</span>
+      </div>
+      <!-- Figma nav bar -->
+      <div style="background:#000;border-radius:16px;overflow:hidden;border-top:0.667px solid #1E2939;padding:18px 36px 0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <img src="https://www.figma.com/api/mcp/asset/bf8d2854-32c5-4125-8d1d-83e1df923a54" alt="Home" style="width:25px;height:25px;object-fit:contain;">
+          <img src="https://www.figma.com/api/mcp/asset/9b075607-755a-4046-9e48-d0b2216f337d" alt="Search" style="width:25px;height:25px;object-fit:contain;">
+          <img src="https://www.figma.com/api/mcp/asset/a33f4514-caf3-464e-8ec4-c31ff6b370be" alt="Chat" style="width:20px;height:20px;object-fit:contain;">
+          <img src="assets/profile-icon.svg" alt="Profile" style="width:25px;height:25px;object-fit:contain;">
+        </div>
+        <div style="display:flex;justify-content:center;padding:14px 94px 8px;">
+          <div style="width:128px;height:4px;background:white;border-radius:9999px;"></div>
+        </div>
+      </div>
+      <p style="text-align:center;margin-top:20px;font-size:0.85rem;color:#a0d8b8;letter-spacing:1px;">4 items — clean &amp; focused</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SLIDE 6 — LOW FIDELITY WIREFRAMES
+     ═══════════════════════════════════════════════ -->
+<section class="slide" id="wireframes">
+  <p class="slide-label reveal">Phase 02</p>
+  <h1 class="slide-title reveal reveal-delay-1">Low Fidelity Wireframes</h1>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SLIDE 7 — HOME PAGE WIREFRAME
+     ═══════════════════════════════════════════════ -->
+<section class="slide" id="wireframe-home">
+  <p class="slide-subtitle reveal"><span style="color:#ffffff;margin-right:12px;">01</span>Home Page</p>
+  <div class="reveal reveal-delay-1" style="margin-top:32px;width:90%;max-width:900px;">
+    <img src="assets/Home_final.png" alt="Home Page — Current vs Wireframe comparison" style="width:100%;border-radius:12px;display:block;">
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SLIDE 7B — INDIVIDUAL POST WIREFRAME
+     ═══════════════════════════════════════════════ -->
+<section class="slide" id="wireframe-post">
+  <p class="slide-subtitle reveal"><span style="color:#ffffff;margin-right:12px;">02</span>Individual Post</p>
+  <div class="reveal reveal-delay-1" style="margin-top:32px;width:90%;max-width:900px;">
+    <img src="assets/PostView.png" alt="Individual Post — Current vs Wireframe comparison" style="width:100%;border-radius:12px;display:block;">
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SLIDE 7C — REPOST WIREFRAME
+     ═══════════════════════════════════════════════ -->
+<section class="slide" id="wireframe-repost">
+  <p class="slide-subtitle reveal"><span style="color:#ffffff;margin-right:12px;">03</span>Repost</p>
+  <p class="reveal reveal-delay-1" style="font-size:1.1rem;color:var(--text-dim);font-style:italic;margin-top:8px;">repost + quote — one screen</p>
+  <div class="reveal reveal-delay-2" style="margin-top:32px;width:90%;max-width:1000px;">
+    <img src="assets/repost.png" alt="Repost — Current vs Wireframe comparison" style="width:100%;border-radius:12px;display:block;">
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SLIDE 7D — SIDE NAVIGATION BAR WIREFRAME
+     ═══════════════════════════════════════════════ -->
+<section class="slide" id="wireframe-sidenav">
+  <p class="slide-subtitle reveal"><span style="color:#ffffff;margin-right:12px;">04</span>Side Navigation Bar</p>
+  <div class="reveal reveal-delay-1" style="margin-top:32px;width:90%;max-width:900px;">
+    <img src="assets/SideNavBar.png" alt="Side Navigation Bar — Current vs Wireframe comparison" style="width:100%;border-radius:12px;display:block;">
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SLIDE 7D — COMMUNITIES WIREFRAME
+     ═══════════════════════════════════════════════ -->
+<section class="slide" id="wireframe-communities">
+  <p class="slide-subtitle reveal"><span style="color:#ffffff;margin-right:12px;">04</span>Communities</p>
+  <p class="reveal reveal-delay-1" style="font-size:1.1rem;color:var(--text-dim);font-style:italic;margin-top:8px;">communities + list — one screen</p>
+  <div class="reveal reveal-delay-2" style="margin-top:32px;width:90%;max-width:900px;">
+    <img src="assets/comlis_old.png" alt="Communities — Current vs Wireframe comparison" style="width:100%;border-radius:12px;display:block;">
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SLIDE 7E — COMMUNITIES WIREFRAME (NEW)
+     ═══════════════════════════════════════════════ -->
+<section class="slide" id="wireframe-communities">
+  <p class="slide-subtitle reveal"><span style="color:#ffffff;margin-right:12px;">05</span>Communities</p>
+  <p class="reveal reveal-delay-1" style="font-size:1.1rem;color:var(--text-dim);font-style:italic;margin-top:8px;">new</p>
+  <div class="reveal reveal-delay-2" style="margin-top:32px;width:90%;max-width:900px;">
+    <img src="assets/comlis_new.png" alt="Communities — New wireframe screens" style="width:100%;border-radius:12px;display:block;">
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SLIDE 7F — SEARCH WIREFRAME
+     ═══════════════════════════════════════════════ -->
+<section class="slide" id="wireframe-search">
+  <p class="slide-subtitle reveal"><span style="color:#ffffff;margin-right:12px;">06</span>Search</p>
+  <div class="reveal reveal-delay-1" style="margin-top:32px;width:90%;max-width:1000px;">
+    <img src="assets/search.png" alt="Search — Current vs Wireframe comparison" style="width:100%;border-radius:12px;display:block;">
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SLIDE 7H — FEEDER WIREFRAME
+     ═══════════════════════════════════════════════ -->
+<section class="slide" id="wireframe-feeder">
+  <p class="slide-subtitle reveal"><span style="color:#ffffff;margin-right:12px;">06</span>Feeder</p>
+  <p class="reveal reveal-delay-1" style="font-size:1rem;color:var(--text-dim);font-style:italic;margin-top:8px;max-width:700px;text-align:center;line-height:1.6;">Feeder — A tool that lets users create custom presets for their own feeds by selecting topics, adjusting tone, selecting the users and generating personalized timelines.<br><br><span style="font-weight:600;color:#e8e8e8;font-style:normal;letter-spacing:2px;">Personalized. Curated. Intentional.</span></p>
+  <div class="reveal reveal-delay-2" style="margin-top:32px;width:90%;max-width:1000px;">
+    <img src="assets/feeder.png" alt="Feeder — Feed Creator, Friends, History screens" style="width:100%;border-radius:12px;display:block;">
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SLIDE 7I — SETTINGS (CURRENT)
+     ═══════════════════════════════════════════════ -->
+<section class="slide" id="wireframe-settings-old">
+  <p class="slide-subtitle reveal"><span style="color:#ffffff;margin-right:12px;">07</span>Settings</p>
+  <p class="reveal reveal-delay-1" style="font-size:1rem;color:var(--text-dim);font-style:italic;margin-top:8px;">different settings access points + different options</p>
+  <div class="reveal reveal-delay-2" style="margin-top:32px;width:90%;max-width:700px;">
+    <img src="assets/sett_old.png" alt="Settings — Current notifications and settings screens" style="width:100%;border-radius:12px;display:block;">
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SLIDE 7J — SETTINGS (NEW)
+     ═══════════════════════════════════════════════ -->
+<section class="slide" id="wireframe-settings-new">
+  <p class="slide-subtitle reveal"><span style="color:#ffffff;margin-right:12px;">07</span>Settings</p>
+  <p class="reveal reveal-delay-1" style="font-size:1rem;color:var(--text-dim);font-style:italic;margin-top:8px;">one unified settings page</p>
+  <div class="reveal reveal-delay-2" style="margin-top:32px;width:90%;max-width:700px;">
+    <img src="assets/sett_new.png" alt="Settings — Redesigned unified settings page" style="width:100%;border-radius:12px;display:block;">
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SLIDE — A/B TESTING
+     ═══════════════════════════════════════════════ -->
+<section class="slide" id="ab-testing">
+  <p class="slide-label reveal">Phase 02</p>
+  <h1 class="slide-title reveal reveal-delay-1">A/B Testing</h1>
+  <!-- Stats Banner -->
+  <div class="research-stats reveal reveal-delay-2" style="display:flex;justify-content:center;gap:120px;margin-top:40px;padding:40px 0;">
+    <div style="text-align:center;">
+      <div class="count-up" data-target="11" style="font-size:5rem;font-weight:700;background:linear-gradient(90deg,#fff 0%,#999 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;">0</div>
+      <p style="font-size:1rem;text-transform:uppercase;letter-spacing:3px;color:var(--text-dim);margin-top:12px;">Participants</p>
+    </div>
+    <div style="text-align:center;">
+      <div class="count-up" data-target="3" style="font-size:5rem;font-weight:700;background:linear-gradient(90deg,#fff 0%,#999 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;">0</div>
+      <p style="font-size:1rem;text-transform:uppercase;letter-spacing:3px;color:var(--text-dim);margin-top:12px;">Winners</p>
+    </div>
+  </div>
+</section>
+
+<!-- PERSONAS & JOURNEYS REMOVED — START MARKER -->
+<section class="slide" id="persona1" style="display:none;">
+  <p class="slide-label reveal">Persona</p>
+  <h1 class="slide-title reveal reveal-delay-1">Persona 1</h1>
+  <div class="persona-card-full reveal reveal-delay-2">
+    <div class="persona-header" style="flex-direction:column;text-align:center;">
+      <div class="persona-avatar-lg" style="overflow:hidden;width:140px;height:140px;">
+        <img src="assets/sarah.png" alt="Sporty Sarah" style="width:100%;height:100%;object-fit:cover;object-position:80% 20%;">
+      </div>
+      <div class="persona-meta">
+        <h2>Sporty Sarah</h2>
+        <p style="display:inline-block;background:#f5c518;color:#000;padding:2px 10px;border-radius:10px;font-size:0.85rem;font-weight:600;margin-bottom:8px;">Experienced User</p>
+        <p>27 · Sports Marketing · Chicago, IL</p>
+        <p style="color:var(--text-dim);font-size:0.95rem;margin-top:4px;">Interests: Sports, Pop Culture, Politics</p>
+      </div>
+    </div>
+    <div class="persona-details" style="display:flex;flex-direction:column;gap:24px;">
+      <div class="persona-detail">
+        <h4>Bio</h4>
+        <p>Sarah was born and raised in Chicago, and attended UIUC for college. She loves everything sports-related, and works in Social Media marketing for the Chicago Cubs. She lives a fast-paced lifestyle and is very active online. She likes staying caught up on all current news, no matter the topic. She creates posts on X for work, but also loves to use it for personal use.</p>
+      </div>
+      <div style="display:flex;gap:24px;width:100%;">
+        <div class="persona-detail" style="flex:1;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:24px 28px;">
+          <h4>Pain Points</h4>
+          <ul style="list-style:none;padding:0;margin:0;">
+            <li style="font-size:1.1rem;color:var(--accent);line-height:1.5;padding:14px 0 14px 20px;position:relative;"><span style="position:absolute;left:0;top:14px;width:6px;height:6px;border-radius:50%;background:var(--text-dim);display:block;"></span>Too many unnecessary or confusing features</li>
+            <li style="font-size:1.1rem;color:var(--accent);line-height:1.5;padding:14px 0 14px 20px;position:relative;"><span style="position:absolute;left:0;top:14px;width:6px;height:6px;border-radius:50%;background:var(--text-dim);display:block;"></span>Grok/AI everywhere</li>
+            <li style="font-size:1.1rem;color:var(--accent);line-height:1.5;padding:14px 0 14px 20px;position:relative;"><span style="position:absolute;left:0;top:14px;width:6px;height:6px;border-radius:50%;background:var(--text-dim);display:block;"></span>Doesn't understand difference between lists and communities</li>
+          </ul>
+        </div>
+        <div class="persona-detail" style="flex:1;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:24px 28px;">
+          <h4>Needs</h4>
+          <ul style="list-style:none;padding:0;margin:0;">
+            <li style="font-size:1.1rem;color:var(--accent);line-height:1.5;padding:14px 0 14px 20px;position:relative;"><span style="position:absolute;left:0;top:14px;width:6px;height:6px;border-radius:50%;background:var(--text-dim);display:block;"></span>Easy to quickly post</li>
+            <li style="font-size:1.1rem;color:var(--accent);line-height:1.5;padding:14px 0 14px 20px;position:relative;"><span style="position:absolute;left:0;top:14px;width:6px;height:6px;border-radius:50%;background:var(--text-dim);display:block;"></span>Many options for engagement with fans</li>
+            <li style="font-size:1.1rem;color:var(--accent);line-height:1.5;padding:14px 0 14px 20px;position:relative;"><span style="position:absolute;left:0;top:14px;width:6px;height:6px;border-radius:50%;background:var(--text-dim);display:block;"></span>Ability to search and find what she's looking for</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SLIDE 8 — JOURNEY 1 (SARAH) — Emotional Graph
+     ═══════════════════════════════════════════════ -->
+<section class="slide" id="journey1" style="display:none;">
+  <p class="slide-label reveal">User Journey</p>
+  <h1 class="slide-title reveal reveal-delay-1">Sarah's Journey</h1>
+  <div class="jg-wrap reveal reveal-delay-2" id="j1-graph">
+    <div class="jg-header">
+      <span class="jg-title">Emotional Journey</span>
+      <div class="jg-legend">
+        <span><span style="color:#4ade80;margin-right:4px;">&#9679;</span>Positive</span>
+        <span><span style="color:#f87171;margin-right:4px;">&#9679;</span>Negative</span>
+      </div>
+    </div>
+    <div class="jg-chart" id="j1-chart">
+      <svg width="1060" height="420" id="j1-svg">
+        <defs>
+          <filter id="jg-glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <!-- Grid line -->
+        <line x1="80" y1="240" x2="1020" y2="240" stroke="#ffffff10" stroke-width="1" stroke-dasharray="4 8"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SLIDE 9 — PERSONA 2 (NORMAL NORA)
+     ═══════════════════════════════════════════════ -->
+<section class="slide" id="persona2" style="display:none;">
+  <p class="slide-label reveal">Persona</p>
+  <h1 class="slide-title reveal reveal-delay-1">Persona 2</h1>
+  <div class="persona-card-full reveal reveal-delay-2">
+    <div class="persona-header" style="flex-direction:column;text-align:center;">
+      <div class="persona-avatar-lg" style="overflow:hidden;width:140px;height:140px;">
+        <img src="assets/nora.png" alt="Normal Nora" style="width:100%;height:100%;object-fit:cover;object-position:50% 20%;">
+      </div>
+      <div class="persona-meta">
+        <h2>Normal Nora</h2>
+        <p style="display:inline-block;background:#f5c518;color:#000;padding:2px 10px;border-radius:10px;font-size:0.85rem;font-weight:600;margin-bottom:8px;">Social User</p>
+        <p>30 · Market Analyst · Stockholm</p>
+        <p style="color:var(--text-dim);font-size:0.95rem;margin-top:4px;">Most Used Apps: X, Instagram, Reddit &amp; WhatsApp</p>
+        <p style="color:var(--text-dim);font-size:0.95rem;margin-top:2px;">Hobbies: DJ Mixing, Painting &amp; Photography</p>
+      </div>
+    </div>
+    <div class="persona-details" style="display:flex;flex-direction:column;gap:24px;">
+      <div class="persona-detail">
+        <h4>Bio</h4>
+        <p>Normal Nora is a social human being, she likes to spend time with family and friends. Instagram is a great place for her, but it has a different use case when compared to 'X'. She feels that 'X' must allow friends to share textual ideas with each other and publicly, which is not a major selling point of Instagram.</p>
+      </div>
+      <div style="display:flex;gap:24px;width:100%;">
+        <div class="persona-detail" style="flex:1;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:24px 28px;">
+          <h4>Pain Points</h4>
+          <ul style="list-style:none;padding:0;margin:0;">
+            <li style="font-size:1.1rem;color:var(--accent);line-height:1.5;padding:14px 0 14px 20px;position:relative;"><span style="position:absolute;left:0;top:14px;width:6px;height:6px;border-radius:50%;background:var(--text-dim);display:block;"></span>The feed does not have a specific structure</li>
+            <li style="font-size:1.1rem;color:var(--accent);line-height:1.5;padding:14px 0 14px 20px;position:relative;"><span style="position:absolute;left:0;top:14px;width:6px;height:6px;border-radius:50%;background:var(--text-dim);display:block;"></span>Filtering in search lacks options</li>
+            <li style="font-size:1.1rem;color:var(--accent);line-height:1.5;padding:14px 0 14px 20px;position:relative;"><span style="position:absolute;left:0;top:14px;width:6px;height:6px;border-radius:50%;background:var(--text-dim);display:block;"></span>The messages tab is not very intuitive</li>
+          </ul>
+        </div>
+        <div class="persona-detail" style="flex:1;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:24px 28px;">
+          <h4>Needs</h4>
+          <ul style="list-style:none;padding:0;margin:0;">
+            <li style="font-size:1.1rem;color:var(--accent);line-height:1.5;padding:14px 0 14px 20px;position:relative;"><span style="position:absolute;left:0;top:14px;width:6px;height:6px;border-radius:50%;background:var(--text-dim);display:block;"></span>Customisable feed with options to include specific interests/profiles</li>
+            <li style="font-size:1.1rem;color:var(--accent);line-height:1.5;padding:14px 0 14px 20px;position:relative;"><span style="position:absolute;left:0;top:14px;width:6px;height:6px;border-radius:50%;background:var(--text-dim);display:block;"></span>Search filter updated with options to include time, popularity and other factors</li>
+            <li style="font-size:1.1rem;color:var(--accent);line-height:1.5;padding:14px 0 14px 20px;position:relative;"><span style="position:absolute;left:0;top:14px;width:6px;height:6px;border-radius:50%;background:var(--text-dim);display:block;"></span>A friends tab in the feed would be a useful addition</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SLIDE 10 — JOURNEY 2 (NORA) — Emotional Graph
+     ═══════════════════════════════════════════════ -->
+<section class="slide" id="journey2" style="display:none;">
+  <p class="slide-label reveal">User Journey</p>
+  <h1 class="slide-title reveal reveal-delay-1">Nora's Journey</h1>
+  <div class="jg-wrap reveal reveal-delay-2" id="j2-graph">
+    <div class="jg-header">
+      <span class="jg-title">Emotional Journey</span>
+      <div class="jg-legend">
+        <span><span style="color:#4ade80;margin-right:4px;">&#9679;</span>Positive</span>
+        <span><span style="color:#f87171;margin-right:4px;">&#9679;</span>Negative</span>
+      </div>
+    </div>
+    <div class="jg-chart" id="j2-chart">
+      <svg width="1060" height="420" id="j2-svg">
+        <defs>
+          <filter id="jg-glow2"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <line x1="80" y1="240" x2="1020" y2="240" stroke="#ffffff10" stroke-width="1" stroke-dasharray="4 8"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 11 — 3 CORE PROBLEMS (REMOVED) -->
+
+<!-- ═══════════════════════════════════════════════
+     SLIDE 12 — NEXT STEPS
+     ═══════════════════════════════════════════════ -->
+<section class="slide" id="nextsteps">
+  <p class="slide-label reveal">Looking Ahead</p>
+  <h1 class="slide-title reveal reveal-delay-1">Next Steps</h1>
+  <div class="next-steps">
+    <div class="step-item reveal reveal-delay-2">
+      <span class="step-num">01</span>
+      <div>
+        <h3>High Fidelity Wireframes</h3>
+      </div>
+    </div>
+    <div class="step-item reveal reveal-delay-3">
+      <span class="step-num">02</span>
+      <div>
+        <h3>Prototyping</h3>
+      </div>
+    </div>
+    <div class="step-item reveal reveal-delay-4">
+      <span class="step-num">03</span>
+      <div>
+        <h3>A/B Testing</h3>
+      </div>
+    </div>
+  </div>
+  <p class="footer-note reveal reveal-delay-5">X Team · Checkpoint 3 · DI Spring 2026</p>
+</section>
+
+<script>
+  // ── Drifting Stars ──────────────────────────────
+  (function createStars() {
+    const container = document.getElementById('starfield');
+    const count = 60;
+    for (let i = 0; i < count; i++) {
+      const s = document.createElement('div');
+      s.classList.add('star');
+      s.style.left = Math.random() * 100 + '%';
+      s.style.top = (Math.random() * 120 + 10) + '%';
+      s.style.setProperty('--drift-dur', (15 + Math.random() * 25) + 's');
+      s.style.setProperty('--fade-dur', (3 + Math.random() * 5) + 's');
+      s.style.setProperty('--delay', (Math.random() * 20) + 's');
+      s.style.setProperty('--star-opacity', (0.2 + Math.random() * 0.6).toFixed(2));
+      const size = (1 + Math.random() * 2.5) + 'px';
+      s.style.width = size;
+      s.style.height = size;
+      container.appendChild(s);
+    }
+  })();
+
+  // ── Scroll Reveal ──────────────────────────────
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // ── Phone mockup annotation trigger ───────────
+  const phoneObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.3 });
+  document.querySelectorAll('.phone-mockup').forEach(el => phoneObserver.observe(el));
+
+  // ── Count-up number animation ───────────────
+  const countObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting && !entry.target.dataset.counted) {
+        entry.target.dataset.counted = 'true';
+        const target = +entry.target.dataset.target;
+        const duration = 1800;
+        const start = performance.now();
+        const easeOut = t => 1 - Math.pow(1 - t, 3);
+        function tick(now) {
+          const elapsed = now - start;
+          const progress = Math.min(elapsed / duration, 1);
+          const value = Math.round(easeOut(progress) * target);
+          entry.target.textContent = value;
+          if (progress < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      }
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('.count-up').forEach(el => countObserver.observe(el));
+
+  // ── Journey Graph — JSX Port (Vanilla JS) ──────
+  (function initJourneyGraph() {
+    const PTS = [
+      { x: 110,  y: 170, label: 'Opens App',      emotion: 'Hopeful',    emoji: '\u{1F60A}', color: '#4ade80', glow: 'rgba(74,222,128,0.4)' },
+      { x: 320,  y: 225, label: 'Scrolls Feed',   emotion: 'Curious',    emoji: '\u{1F914}', color: '#38bdf8', glow: 'rgba(56,189,248,0.4)' },
+      { x: 530,  y: 280, label: 'Sees Clutter',   emotion: 'Annoyed',    emoji: '\u{1F624}', color: '#fbbf24', glow: 'rgba(251,191,36,0.4)' },
+      { x: 740,  y: 320, label: 'Searches Topic',  emotion: 'Frustrated', emoji: '\u{1F621}', color: '#f97316', glow: 'rgba(249,115,22,0.4)' },
+      { x: 950,  y: 358, label: 'Gives Up',        emotion: 'Defeated',   emoji: '\u{1F62D}', color: '#f87171', glow: 'rgba(248,113,113,0.4)' },
+    ];
+
+    const SEQ = { DRAW_MS: 1400, SPARKLE_HOLD: 400, LABEL_IN: 400, LABEL_HOLD: 3000, LABEL_OUT: 500, EMOJI_IN: 500, BADGE_IN: 500, DONE_WAIT: 900 };
+
+    function segPath(i) {
+      const p0 = PTS[i], p1 = PTS[i + 1];
+      const dx = (p1.x - p0.x) * 0.45;
+      return 'M ' + p0.x + ' ' + p0.y + ' C ' + (p0.x + dx) + ' ' + p0.y + ' ' + (p1.x - dx) + ' ' + p1.y + ' ' + p1.x + ' ' + p1.y;
+    }
+
+    const graph = document.getElementById('j1-graph');
+    const chart = document.getElementById('j1-chart');
+    const svg = document.getElementById('j1-svg');
+    if (!graph || !svg) return;
+
+    const ns = 'http://www.w3.org/2000/svg';
+    let started = false;
+
+    // Add per-segment gradients
+    const defs = svg.querySelector('defs');
+    for (let i = 0; i < 4; i++) {
+      const grad = document.createElementNS(ns, 'linearGradient');
+      grad.id = 'seg' + i;
+      grad.setAttribute('gradientUnits', 'userSpaceOnUse');
+      grad.setAttribute('x1', PTS[i].x); grad.setAttribute('y1', PTS[i].y);
+      grad.setAttribute('x2', PTS[i + 1].x); grad.setAttribute('y2', PTS[i + 1].y);
+      const s1 = document.createElementNS(ns, 'stop'); s1.setAttribute('offset', '0%'); s1.setAttribute('stop-color', PTS[i].color);
+      const s2 = document.createElementNS(ns, 'stop'); s2.setAttribute('offset', '100%'); s2.setAttribute('stop-color', PTS[i + 1].color);
+      grad.appendChild(s1); grad.appendChild(s2);
+      defs.appendChild(grad);
+    }
+
+    // Add x-axis labels
+    PTS.forEach(pt => {
+      const lbl = document.createElement('div');
+      lbl.className = 'jg-xlabel';
+      lbl.textContent = pt.label;
+      lbl.style.left = pt.x + 'px';
+      lbl.style.top = '392px';
+      chart.appendChild(lbl);
+    });
+
+    // Segment drawing state
+    const segProgs = [0, 0, 0, 0];
+    const segGlowEls = [], segLineEls = [];
+    for (let i = 0; i < 4; i++) {
+      const d = segPath(i);
+      // Glow layer
+      const gp = document.createElementNS(ns, 'path');
+      gp.setAttribute('d', d); gp.setAttribute('fill', 'none');
+      gp.setAttribute('stroke', 'url(#seg' + i + ')');
+      gp.setAttribute('stroke-width', '8'); gp.setAttribute('stroke-linecap', 'round');
+      gp.setAttribute('opacity', '0.3'); gp.setAttribute('filter', 'url(#jg-glow)');
+      gp.setAttribute('pathLength', '1'); gp.setAttribute('stroke-dasharray', '1'); gp.setAttribute('stroke-dashoffset', '1');
+      svg.appendChild(gp); segGlowEls.push(gp);
+      // Main line
+      const lp = document.createElementNS(ns, 'path');
+      lp.setAttribute('d', d); lp.setAttribute('fill', 'none');
+      lp.setAttribute('stroke', 'url(#seg' + i + ')');
+      lp.setAttribute('stroke-width', '3'); lp.setAttribute('stroke-linecap', 'round');
+      lp.setAttribute('pathLength', '1'); lp.setAttribute('stroke-dasharray', '1'); lp.setAttribute('stroke-dashoffset', '1');
+      svg.appendChild(lp); segLineEls.push(lp);
+    }
+
+    function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+    function drawSeg(i) {
+      return new Promise(resolve => {
+        const start = performance.now();
+        function tick(now) {
+          let t = Math.min((now - start) / SEQ.DRAW_MS, 1);
+          const e = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+          const off = String(1 - e);
+          segGlowEls[i].setAttribute('stroke-dashoffset', off);
+          segLineEls[i].setAttribute('stroke-dashoffset', off);
+          if (t < 1) requestAnimationFrame(tick); else resolve();
+        }
+        requestAnimationFrame(tick);
+      });
+    }
+
+    function showDot(pt) {
+      // Sparkle rings
+      for (let r = 0; r < 2; r++) {
+        const ring = document.createElementNS(ns, 'circle');
+        ring.setAttribute('cx', pt.x); ring.setAttribute('cy', pt.y); ring.setAttribute('r', '10');
+        ring.setAttribute('fill', 'none'); ring.setAttribute('stroke', pt.color);
+        ring.setAttribute('stroke-width', r === 0 ? '2' : '1.5'); ring.setAttribute('opacity', '0');
+        ring.style.animation = 'jg-expandRing 1s ease-out ' + (r * 0.25) + 's forwards';
+        svg.appendChild(ring);
+        setTimeout(() => ring.remove(), 1500);
+      }
+      // Outer ring
+      const outer = document.createElementNS(ns, 'circle');
+      outer.setAttribute('cx', pt.x); outer.setAttribute('cy', pt.y); outer.setAttribute('r', '13');
+      outer.setAttribute('fill', 'none'); outer.setAttribute('stroke', pt.color);
+      outer.setAttribute('stroke-width', '1.5'); outer.setAttribute('opacity', '0.35');
+      svg.appendChild(outer);
+      // Dot
+      const dot = document.createElementNS(ns, 'circle');
+      dot.setAttribute('cx', pt.x); dot.setAttribute('cy', pt.y); dot.setAttribute('r', '8');
+      dot.setAttribute('fill', pt.color); dot.setAttribute('filter', 'url(#jg-glow)');
+      dot.style.transformOrigin = pt.x + 'px ' + pt.y + 'px';
+      dot.style.animation = 'jg-popDot 0.4s ease-out forwards';
+      svg.appendChild(dot);
+    }
+
+    function showLabel(pt) {
+      const el = document.createElement('div');
+      el.className = 'jg-overlay jg-step-label';
+      el.textContent = pt.label;
+      el.style.background = pt.color;
+      el.style.left = pt.x + 'px';
+      el.style.bottom = (420 - pt.y + 14) + 'px';
+      el.style.animation = 'jg-labelSlideIn 0.4s ease forwards';
+      chart.appendChild(el);
+      return el;
+    }
+
+    function rollUpLabel(el) {
+      el.style.animation = 'jg-labelRollUp 0.5s ease forwards';
+      setTimeout(() => el.remove(), 500);
+    }
+
+    function showEmoji(pt) {
+      const el = document.createElement('div');
+      el.className = 'jg-overlay jg-emoji';
+      el.textContent = pt.emoji;
+      el.style.left = pt.x + 'px';
+      el.style.bottom = (420 - pt.y + 50) + 'px';
+      el.style.animation = 'jg-emojiBounce 0.55s cubic-bezier(.36,.07,.19,.97) forwards';
+      chart.appendChild(el);
+    }
+
+    function showBadge(pt) {
+      const el = document.createElement('div');
+      el.className = 'jg-overlay jg-badge';
+      el.textContent = pt.emotion;
+      el.style.color = pt.color;
+      el.style.borderWidth = '1.5px';
+      el.style.borderStyle = 'solid';
+      el.style.borderColor = pt.color;
+      el.style.boxShadow = '0 0 10px ' + pt.glow;
+      el.style.left = pt.x + 'px';
+      el.style.bottom = (420 - pt.y + 14) + 'px';
+      el.style.animation = 'jg-badgePop 0.45s ease forwards';
+      chart.appendChild(el);
+    }
+
+    async function animatePoint(i) {
+      const pt = PTS[i];
+      showDot(pt);
+      await delay(SEQ.SPARKLE_HOLD);
+      const lbl = showLabel(pt);
+      await delay(SEQ.LABEL_HOLD);
+      rollUpLabel(lbl);
+      await delay(SEQ.LABEL_OUT);
+      showEmoji(pt);
+      await delay(SEQ.EMOJI_IN);
+      showBadge(pt);
+      await delay(SEQ.BADGE_IN + SEQ.DONE_WAIT);
+    }
+
+    async function runAll() {
+      await delay(600);
+      for (let i = 0; i < PTS.length; i++) {
+        await animatePoint(i);
+        if (i < 4) await drawSeg(i);
+      }
+    }
+
+    const jObs = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !started) {
+          started = true;
+          runAll();
+        }
+      });
+    }, { threshold: 0.25 });
+    jObs.observe(graph);
+  })();
+
+  // ── Nora's Journey Graph ──────────────────────
+  (function initNorJourney() {
+    const PTS = [
+      { x: 110,  y: 190, label: 'Opens Feed',       emotion: 'Neutral',      emoji: '\u{1F610}', color: '#38bdf8', glow: 'rgba(56,189,248,0.4)' },
+      { x: 320,  y: 240, label: 'Sees Random Posts', emotion: 'Confused',     emoji: '\u{1F615}', color: '#a78bfa', glow: 'rgba(167,139,250,0.4)' },
+      { x: 530,  y: 290, label: 'Tries Search',      emotion: 'Annoyed',      emoji: '\u{1F624}', color: '#fbbf24', glow: 'rgba(251,191,36,0.4)' },
+      { x: 740,  y: 330, label: 'Messages Tab',      emotion: 'Frustrated',   emoji: '\u{1F621}', color: '#f97316', glow: 'rgba(249,115,22,0.4)' },
+      { x: 950,  y: 290, label: 'Switches to IG',    emotion: 'Relieved',     emoji: '\u{1F60C}', color: '#4ade80', glow: 'rgba(74,222,128,0.4)' },
+    ];
+
+    const SEQ = { DRAW_MS: 1400, SPARKLE_HOLD: 400, LABEL_IN: 400, LABEL_HOLD: 3000, LABEL_OUT: 500, EMOJI_IN: 500, BADGE_IN: 500, DONE_WAIT: 900 };
+
+    function segPath(i) {
+      const p0 = PTS[i], p1 = PTS[i + 1];
+      const dx = (p1.x - p0.x) * 0.45;
+      return 'M ' + p0.x + ' ' + p0.y + ' C ' + (p0.x + dx) + ' ' + p0.y + ' ' + (p1.x - dx) + ' ' + p1.y + ' ' + p1.x + ' ' + p1.y;
+    }
+
+    const graph = document.getElementById('j2-graph');
+    const chart = document.getElementById('j2-chart');
+    const svg = document.getElementById('j2-svg');
+    if (!graph || !svg) return;
+
+    const ns = 'http://www.w3.org/2000/svg';
+    let started = false;
+
+    const defs = svg.querySelector('defs');
+    for (let i = 0; i < 4; i++) {
+      const grad = document.createElementNS(ns, 'linearGradient');
+      grad.id = 'n2seg' + i;
+      grad.setAttribute('gradientUnits', 'userSpaceOnUse');
+      grad.setAttribute('x1', PTS[i].x); grad.setAttribute('y1', PTS[i].y);
+      grad.setAttribute('x2', PTS[i + 1].x); grad.setAttribute('y2', PTS[i + 1].y);
+      const s1 = document.createElementNS(ns, 'stop'); s1.setAttribute('offset', '0%'); s1.setAttribute('stop-color', PTS[i].color);
+      const s2 = document.createElementNS(ns, 'stop'); s2.setAttribute('offset', '100%'); s2.setAttribute('stop-color', PTS[i + 1].color);
+      grad.appendChild(s1); grad.appendChild(s2);
+      defs.appendChild(grad);
+    }
+
+    PTS.forEach(pt => {
+      const lbl = document.createElement('div');
+      lbl.className = 'jg-xlabel';
+      lbl.textContent = pt.label;
+      lbl.style.left = pt.x + 'px';
+      lbl.style.top = '392px';
+      chart.appendChild(lbl);
+    });
+
+    const segGlowEls = [], segLineEls = [];
+    for (let i = 0; i < 4; i++) {
+      const d = segPath(i);
+      const gp = document.createElementNS(ns, 'path');
+      gp.setAttribute('d', d); gp.setAttribute('fill', 'none');
+      gp.setAttribute('stroke', 'url(#n2seg' + i + ')');
+      gp.setAttribute('stroke-width', '8'); gp.setAttribute('stroke-linecap', 'round');
+      gp.setAttribute('opacity', '0.3'); gp.setAttribute('filter', 'url(#jg-glow2)');
+      gp.setAttribute('pathLength', '1'); gp.setAttribute('stroke-dasharray', '1'); gp.setAttribute('stroke-dashoffset', '1');
+      svg.appendChild(gp); segGlowEls.push(gp);
+      const lp = document.createElementNS(ns, 'path');
+      lp.setAttribute('d', d); lp.setAttribute('fill', 'none');
+      lp.setAttribute('stroke', 'url(#n2seg' + i + ')');
+      lp.setAttribute('stroke-width', '3'); lp.setAttribute('stroke-linecap', 'round');
+      lp.setAttribute('pathLength', '1'); lp.setAttribute('stroke-dasharray', '1'); lp.setAttribute('stroke-dashoffset', '1');
+      svg.appendChild(lp); segLineEls.push(lp);
+    }
+
+    function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+    function drawSeg(i) {
+      return new Promise(resolve => {
+        const start = performance.now();
+        function tick(now) {
+          let t = Math.min((now - start) / SEQ.DRAW_MS, 1);
+          const e = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+          const off = String(1 - e);
+          segGlowEls[i].setAttribute('stroke-dashoffset', off);
+          segLineEls[i].setAttribute('stroke-dashoffset', off);
+          if (t < 1) requestAnimationFrame(tick); else resolve();
+        }
+        requestAnimationFrame(tick);
+      });
+    }
+
+    function showDot(pt) {
+      for (let r = 0; r < 2; r++) {
+        const ring = document.createElementNS(ns, 'circle');
+        ring.setAttribute('cx', pt.x); ring.setAttribute('cy', pt.y); ring.setAttribute('r', '10');
+        ring.setAttribute('fill', 'none'); ring.setAttribute('stroke', pt.color);
+        ring.setAttribute('stroke-width', r === 0 ? '2' : '1.5'); ring.setAttribute('opacity', '0');
+        ring.style.animation = 'jg-expandRing 1s ease-out ' + (r * 0.25) + 's forwards';
+        svg.appendChild(ring);
+        setTimeout(() => ring.remove(), 1500);
+      }
+      const outer = document.createElementNS(ns, 'circle');
+      outer.setAttribute('cx', pt.x); outer.setAttribute('cy', pt.y); outer.setAttribute('r', '13');
+      outer.setAttribute('fill', 'none'); outer.setAttribute('stroke', pt.color);
+      outer.setAttribute('stroke-width', '1.5'); outer.setAttribute('opacity', '0.35');
+      svg.appendChild(outer);
+      const dot = document.createElementNS(ns, 'circle');
+      dot.setAttribute('cx', pt.x); dot.setAttribute('cy', pt.y); dot.setAttribute('r', '8');
+      dot.setAttribute('fill', pt.color); dot.setAttribute('filter', 'url(#jg-glow2)');
+      dot.style.transformOrigin = pt.x + 'px ' + pt.y + 'px';
+      dot.style.animation = 'jg-popDot 0.4s ease-out forwards';
+      svg.appendChild(dot);
+    }
+
+    function showLabel(pt) {
+      const el = document.createElement('div');
+      el.className = 'jg-overlay jg-step-label';
+      el.textContent = pt.label;
+      el.style.background = pt.color;
+      el.style.left = pt.x + 'px';
+      el.style.bottom = (420 - pt.y + 14) + 'px';
+      el.style.animation = 'jg-labelSlideIn 0.4s ease forwards';
+      chart.appendChild(el);
+      return el;
+    }
+
+    function rollUpLabel(el) {
+      el.style.animation = 'jg-labelRollUp 0.5s ease forwards';
+      setTimeout(() => el.remove(), 500);
+    }
+
+    function showEmoji(pt) {
+      const el = document.createElement('div');
+      el.className = 'jg-overlay jg-emoji';
+      el.textContent = pt.emoji;
+      el.style.left = pt.x + 'px';
+      el.style.bottom = (420 - pt.y + 50) + 'px';
+      el.style.animation = 'jg-emojiBounce 0.55s cubic-bezier(.36,.07,.19,.97) forwards';
+      chart.appendChild(el);
+    }
+
+    function showBadge(pt) {
+      const el = document.createElement('div');
+      el.className = 'jg-overlay jg-badge';
+      el.textContent = pt.emotion;
+      el.style.color = pt.color;
+      el.style.borderWidth = '1.5px';
+      el.style.borderStyle = 'solid';
+      el.style.borderColor = pt.color;
+      el.style.boxShadow = '0 0 10px ' + pt.glow;
+      el.style.left = pt.x + 'px';
+      el.style.bottom = (420 - pt.y + 14) + 'px';
+      el.style.animation = 'jg-badgePop 0.45s ease forwards';
+      chart.appendChild(el);
+    }
+
+    async function animatePoint(i) {
+      const pt = PTS[i];
+      showDot(pt);
+      await delay(SEQ.SPARKLE_HOLD);
+      const lbl = showLabel(pt);
+      await delay(SEQ.LABEL_HOLD);
+      rollUpLabel(lbl);
+      await delay(SEQ.LABEL_OUT);
+      showEmoji(pt);
+      await delay(SEQ.EMOJI_IN);
+      showBadge(pt);
+      await delay(SEQ.BADGE_IN + SEQ.DONE_WAIT);
+    }
+
+    async function runAll() {
+      await delay(600);
+      for (let i = 0; i < PTS.length; i++) {
+        await animatePoint(i);
+        if (i < 4) await drawSeg(i);
+      }
+    }
+
+    const jObs2 = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !started) {
+          started = true;
+          runAll();
+        }
+      });
+    }, { threshold: 0.25 });
+    jObs2.observe(graph);
+  })();
+
+  // ── IA Diagram — Click to Simplify Animation ──────
+  (function initIAAnimation() {
+    const container = document.getElementById('ia-container');
+    if (!container) return;
+    let animated = false;
+
+    container.addEventListener('click', function() {
+      if (animated) return;
+      animated = true;
+
+      const hint = document.getElementById('ia-hint');
+      if (hint) hint.style.opacity = '0';
+
+      // Items to REMOVE: profile, lists, spaces, creator, grok-dl
+      // Items to KEEP: bookmarks, communities, video, settings, grok(renamed from grok-dl? no - grok stays, grok-dl removed), premium, help
+      // Wait — from Image #8 the final 7 are: Bookmarks, Communities, Video, Settings&Privacy, Grok, Help Center, Premium
+      // Current 11: Profile, Premium, Video, Communities, Bookmarks, Lists, Spaces, Creator Studio, Download Grok, Settings&Privacy, Help Center
+      // Remove: Profile, Lists, Spaces, Creator Studio, Download Grok (that's 5 removed → but we need to rename Download Grok?)
+      // Actually keep Grok (not Download Grok). Let me remove: Profile, Lists, Spaces, Creator Studio, Download Grok = 5 removed. 11-5 = 6...
+      // Image #8 has 7: Bookmarks, Communities, Video, Settings&Privacy, Grok, Help Center, Premium. That's 7.
+      // From current 11 remove: Profile, Lists, Spaces, Creator Studio = 4 removed. Download Grok becomes just "Grok". 11-4 = 7. Yes!
+
+      const removeItems = ['profile', 'lists', 'spaces', 'creator'];
+      const renameItem = 'grok-dl'; // rename to "Grok"
+
+      // Final positions for the 7 kept items (matching Image #8 layout)
+      // Order: Bookmarks, Communities, Video, Settings&Privacy, Grok, Help Center, Premium
+      const finalPositions = {
+        'bookmarks':   { y: 60 },
+        'communities': { y: 120 },
+        'video':       { y: 200 },
+        'settings':    { y: 280 },
+        'grok-dl':     { y: 340 },
+        'help':        { y: 400 },
+        'premium':     { y: 460 }
+      };
+
+      // Step 1: Fade out removed items one by one
+      let delay = 0;
+      removeItems.forEach(function(item) {
+        delay += 600;
+        setTimeout(function() {
+          var nodes = document.querySelectorAll('[data-item="' + item + '"]');
+          nodes.forEach(function(n) { n.classList.add('removing'); });
+        }, delay);
+      });
+
+      // Step 2: After removals, rearrange remaining items
+      var rearrangeDelay = delay + 1000;
+      setTimeout(function() {
+        // Hide old badge, divider
+        document.getElementById('ia-badge').style.opacity = '0';
+        document.getElementById('ia-divider').style.opacity = '0';
+
+        // Remove the removed nodes from DOM after fade
+        removeItems.forEach(function(item) {
+          var nodes = document.querySelectorAll('[data-item="' + item + '"]');
+          nodes.forEach(function(n) { n.style.display = 'none'; });
+        });
+
+        // Animate remaining items to new positions
+        Object.keys(finalPositions).forEach(function(item) {
+          var targetY = finalPositions[item].y;
+          var nodeGroup = document.querySelector('g.ia-node[data-item="' + item + '"]');
+          var branchLine = document.querySelector('line.ia-line[data-item="' + item + '"]');
+
+          if (nodeGroup) {
+            var rect = nodeGroup.querySelector('rect');
+            var text = nodeGroup.querySelector('text');
+            var currentY = parseFloat(rect.getAttribute('y'));
+            var diffY = targetY - currentY;
+            nodeGroup.style.transition = 'transform 1s ease';
+            nodeGroup.style.transform = 'translateY(' + diffY + 'px)';
+
+            // Rename "Download Grok" → "Grok" and fix styling
+            if (item === 'grok-dl') {
+              text.textContent = 'Grok';
+              rect.setAttribute('fill', '#2a3444');
+              rect.setAttribute('stroke', '#4a5a6a');
+              text.setAttribute('fill', '#c8d4e0');
+              text.setAttribute('font-size', '12');
+            }
+          }
+
+          if (branchLine) {
+            branchLine.style.transition = 'all 1s ease';
+            branchLine.setAttribute('y1', targetY);
+            branchLine.setAttribute('y2', targetY);
+          }
+        });
+
+        // Resize trunk line
+        var trunk = document.getElementById('ia-trunk');
+        trunk.style.transition = 'all 1s ease';
+        trunk.setAttribute('y1', '60');
+        trunk.setAttribute('y2', '460');
+
+        // Update Hamburger & Open App / Home vertical center
+        // They stay centered — the new midpoint of 60..460 is 260
+        // Current position is y=330, move to y=240
+        var fixedNodes = document.querySelectorAll('g.ia-node:not([data-item])');
+        // actually let's keep them at 330, it looks fine
+
+      }, rearrangeDelay);
+
+      // Step 3: Show final badge
+      setTimeout(function() {
+        document.getElementById('ia-badge-final').setAttribute('opacity', '1');
+      }, rearrangeDelay + 1200);
+    });
+  })();
+
+  // ── Feeder IA — Click to Expand Tiers ──────
+  (function initFeederIA() {
+    var container = document.getElementById('feeder-container');
+    if (!container) return;
+
+    // Hide tiers 2+ initially
+    var allTiers = container.querySelectorAll('.feeder-tier');
+    allTiers.forEach(function(tier) {
+      var t = parseInt(tier.getAttribute('data-tier'));
+      if (t >= 2) {
+        tier.style.opacity = '0';
+        tier.style.transform = 'translateY(15px)';
+        tier.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+      }
+    });
+
+    var currentTier = 1; // tiers 0-1 visible at start
+    var maxTier = 6;
+
+    container.addEventListener('click', function() {
+      currentTier++;
+      if (currentTier > maxTier + 1) return;
+
+      // Hide the hint after first click
+      var hint = document.getElementById('feeder-hint');
+      if (hint) hint.style.opacity = '0';
+
+      // Reveal the next tier
+      allTiers.forEach(function(tier) {
+        var t = parseInt(tier.getAttribute('data-tier'));
+        if (t <= currentTier) {
+          tier.style.opacity = '1';
+          tier.style.transform = 'translateY(0)';
+        }
+      });
+    });
+  })();
+
+  // ── Low Nav — Click to Simplify Animation ──────
+  (function initLowNavIA() {
+    var container = document.getElementById('lownav-container');
+    if (!container) return;
+    var animated = false;
+
+    container.addEventListener('click', function() {
+      if (animated) return;
+      animated = true;
+
+      var hint = document.getElementById('lownav-hint');
+      if (hint) hint.style.opacity = '0';
+
+      var removeItems = document.querySelectorAll('.lownav-remove-item');
+
+      // Step 1: Fade out Grok
+      setTimeout(function() {
+        removeItems[0].style.opacity = '0';
+        removeItems[0].style.transform = 'scale(0.8)';
+      }, 500);
+
+      // Step 2: Fade out Notifications
+      setTimeout(function() {
+        removeItems[1].style.opacity = '0';
+        removeItems[1].style.transform = 'scale(0.8)';
+      }, 1200);
+
+      // Step 3: Fade out Messages
+      setTimeout(function() {
+        removeItems[2].style.opacity = '0';
+        removeItems[2].style.transform = 'scale(0.8)';
+      }, 1900);
+
+      // Step 4: Swap to Figma design
+      setTimeout(function() {
+        var original = document.getElementById('lownav-original');
+        original.style.transition = 'opacity 0.6s ease';
+        original.style.opacity = '0';
+
+        setTimeout(function() {
+          original.style.height = '0';
+          original.style.overflow = 'hidden';
+          var updated = document.getElementById('lownav-updated');
+          updated.style.opacity = '1';
+          updated.style.height = 'auto';
+        }, 600);
+      }, 3000);
+    });
+  })();
+</script>
+
+</body>
+</html>

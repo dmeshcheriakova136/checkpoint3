@@ -1,0 +1,10 @@
+# macOS
+.DS_Store
+
+# Backups
+*.bak
+
+# Editor / OS
+*~
+.vscode/
+.idea/
