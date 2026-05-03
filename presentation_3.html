@@ -893,6 +893,37 @@
     100% { opacity: 0; transform: translateX(-50%) scale(0.95); }
   }
 
+  /* Tap-to-start hint (shared across ab slides) */
+  .ab-tap-hint {
+    position: absolute;
+    top: -56px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 4;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 600;
+    padding: 8px 18px;
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 999px;
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    pointer-events: none;
+    animation: abHintPulse 2s ease-in-out infinite;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+  }
+  .ab-tap-hint.is-hidden {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-6px);
+  }
+  @keyframes abHintPulse {
+    0%, 100% { opacity: 0.7; }
+    50%      { opacity: 1; }
+  }
+
   /* Side-by-side comparison — both visible from the start */
   #ab-home .ab-compare {
     display: flex;
@@ -955,6 +986,7 @@
       <span class="ab-count-2">2</span>
       <span class="ab-count-1">1</span>
     </div>
+    <div class="ab-tap-hint" id="abHomeHint">Tap to start</div>
 
     <div class="ab-compare">
       <figure class="ab-phone ab-phone-winner" id="abHomeWinner">
@@ -975,24 +1007,22 @@
     if (!slide) return;
     const loser = document.getElementById('abHomeLoser');
     const winner = document.getElementById('abHomeWinner');
+    const hint = document.getElementById('abHomeHint');
     let triggered = false;
 
-    const obs = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting && !triggered) {
-          triggered = true;
-          // Both phones are already visible — start countdown immediately on top.
-          slide.classList.add('is-running');
-          // 3s countdown + 5s view window -> loser fades, then winner reveals as champion.
-          setTimeout(() => {
-            loser.classList.add('is-out');
-            winner.classList.add('is-winning');
-          }, 8000);
-        }
-      });
-    }, { threshold: 0.4 });
+    function start() {
+      if (triggered) return;
+      triggered = true;
+      if (hint) hint.classList.add('is-hidden');
+      slide.classList.add('is-running');
+      setTimeout(() => {
+        loser.classList.add('is-out');
+        winner.classList.add('is-winning');
+      }, 8000);
+    }
 
-    obs.observe(slide);
+    slide.style.cursor = 'pointer';
+    slide.addEventListener('click', start);
   })();
 </script>
 
@@ -1118,6 +1148,7 @@
       <span class="ab-count-2">2</span>
       <span class="ab-count-1">1</span>
     </div>
+    <div class="ab-tap-hint" id="abCommunitiesHint">Tap to start</div>
 
     <div class="ab-compare">
       <figure class="ab-phone ab-phone-winner" id="abCommunitiesWinner">
@@ -1138,24 +1169,22 @@
     if (!slide) return;
     const loser = document.getElementById('abCommunitiesLoser');
     const winner = document.getElementById('abCommunitiesWinner');
+    const hint = document.getElementById('abCommunitiesHint');
     let triggered = false;
 
-    const obs = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting && !triggered) {
-          triggered = true;
-          // Both phones are already visible — start countdown immediately on top.
-          slide.classList.add('is-running');
-          // 3s countdown + 5s view window -> loser fades, then winner reveals as champion.
-          setTimeout(() => {
-            loser.classList.add('is-out');
-            winner.classList.add('is-winning');
-          }, 8000);
-        }
-      });
-    }, { threshold: 0.4 });
+    function start() {
+      if (triggered) return;
+      triggered = true;
+      if (hint) hint.classList.add('is-hidden');
+      slide.classList.add('is-running');
+      setTimeout(() => {
+        loser.classList.add('is-out');
+        winner.classList.add('is-winning');
+      }, 8000);
+    }
 
-    obs.observe(slide);
+    slide.style.cursor = 'pointer';
+    slide.addEventListener('click', start);
   })();
 </script>
 
@@ -1281,6 +1310,7 @@
       <span class="ab-count-2">2</span>
       <span class="ab-count-1">1</span>
     </div>
+    <div class="ab-tap-hint" id="abTrendingHint">Tap to start</div>
 
     <div class="ab-compare">
       <figure class="ab-phone ab-phone-winner" id="abTrendingWinner">
@@ -1301,26 +1331,49 @@
     if (!slide) return;
     const loser = document.getElementById('abTrendingLoser');
     const winner = document.getElementById('abTrendingWinner');
+    const hint = document.getElementById('abTrendingHint');
     let triggered = false;
 
-    const obs = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting && !triggered) {
-          triggered = true;
-          // Both phones are already visible — start countdown immediately on top.
-          slide.classList.add('is-running');
-          // 3s countdown + 5s view window -> loser fades, then winner reveals as champion.
-          setTimeout(() => {
-            loser.classList.add('is-out');
-            winner.classList.add('is-winning');
-          }, 8000);
-        }
-      });
-    }, { threshold: 0.4 });
+    function start() {
+      if (triggered) return;
+      triggered = true;
+      if (hint) hint.classList.add('is-hidden');
+      slide.classList.add('is-running');
+      setTimeout(() => {
+        loser.classList.add('is-out');
+        winner.classList.add('is-winning');
+      }, 8000);
+    }
 
-    obs.observe(slide);
+    slide.style.cursor = 'pointer';
+    slide.addEventListener('click', start);
   })();
 </script>
+
+<!-- ═══════════════════════════════════════════════
+     SLIDE — TWITTER VIDEO (full-bleed)
+     ═══════════════════════════════════════════════ -->
+<style>
+  #twitter-video-slide {
+    padding: 0;
+    min-height: 100vh;
+    background: #000;
+  }
+  #twitter-video-slide .fullbleed-video {
+    width: 100%;
+    height: 100vh;
+    object-fit: contain;
+    display: block;
+    background: #000;
+  }
+</style>
+<section class="slide" id="twitter-video-slide">
+  <video class="fullbleed-video" autoplay muted loop playsinline controls preload="metadata">
+    <source src="assets/prototypes/Twitter Video.mov" type="video/quicktime">
+    <source src="assets/prototypes/Twitter Video.mov" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+</section>
 
 <!-- ═══════════════════════════════════════════════
      SLIDE — PROTOTYPING (Phase 03 intro)
@@ -1843,7 +1896,7 @@
       <span class="addr-num">03</span>
       <div class="addr-problem">
         <span class="addr-label">Problem</span>
-        <span class="addr-text">Placeholder here</span>
+        <span class="addr-text">Overwhelming UI</span>
       </div>
       <span class="addr-arrow" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1853,7 +1906,7 @@
       </span>
       <div class="addr-solution">
         <span class="addr-label">Solution</span>
-        <span class="addr-text">Placeholder</span>
+        <span class="addr-text">Modern, clean visual design library</span>
       </div>
     </li>
   </ol>
@@ -1927,7 +1980,7 @@
     <div class="learning-row reveal reveal-delay-1">
       <div class="learning-avatar"><img src="assets/daria.png" alt="Daria" style="object-position:center 20%;"></div>
       <div class="learning-quote">
-        <p>"Working inside a strict design system pushed me to think about consistency at every level — every spacing token and color choice mattered."</p>
+        <p>"Design thinking is a must + trust your team"</p>
         <span class="learning-name">Daria Meshcheriakova</span>
       </div>
     </div>
@@ -1935,7 +1988,7 @@
     <div class="learning-row reveal reveal-delay-2">
       <div class="learning-avatar"><img src="assets/Megan_Photo.jpg" alt="Megan" style="object-position:center 15%;"></div>
       <div class="learning-quote">
-        <p>"User interviews completely reframed our problem space — assumptions rarely hold up against real conversations."</p>
+        <p>"There are many useful ways to incorporate AI into UX design, such as creating low-fis, but human design thinking is still the best tool."</p>
         <span class="learning-name">Megan Weiss</span>
       </div>
     </div>
@@ -1943,7 +1996,7 @@
     <div class="learning-row reveal reveal-delay-3">
       <div class="learning-avatar"><img src="assets/Amy_Photo.jpg" alt="Amy" style="object-position:center 15%;"></div>
       <div class="learning-quote">
-        <p>"A/B testing showed me that the smallest interaction details — a label, a placement — often shape the experience the most."</p>
+        <p>"I really enjoyed diving into the design process early in the semester and adapting our designs through A/B testing!"</p>
         <span class="learning-name">Amy Wang</span>
       </div>
     </div>
@@ -1951,7 +2004,7 @@
     <div class="learning-row reveal reveal-delay-4">
       <div class="learning-avatar"><img src="assets/Dhruv_Photo.jpg" alt="Dhruv" style="object-position:center 15%;"></div>
       <div class="learning-quote">
-        <p>"Iterating from lo-fi to hi-fi prototypes taught me how much a design changes once it meets real feedback."</p>
+        <p>"User evaluations made me think about design in a different way. It's not about what you want. It's about what users want."</p>
         <span class="learning-name">Dhruv Sawhney</span>
       </div>
     </div>
@@ -1959,7 +2012,7 @@
     <div class="learning-row reveal reveal-delay-5">
       <div class="learning-avatar"><img src="assets/Nipun_Photo.jpg" alt="Nipun" style="object-position:center 15%;"></div>
       <div class="learning-quote">
-        <p>"Bridging Figma and code made our design constraints feel concrete in a way critique alone never could."</p>
+        <p>"Working with Figma Make and high-level prototyping was a great learning experience."</p>
         <span class="learning-name">Nipun Chandra Surnilla</span>
       </div>
     </div>
